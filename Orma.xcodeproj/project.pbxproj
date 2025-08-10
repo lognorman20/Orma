@@ -6,6 +6,24 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		160163AD7D588868C7BCDB3E /* Pods_Orma_OrmaUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25B3678B2702D67EE76FBB0A /* Pods_Orma_OrmaUITests.framework */; };
+		2998D70F817A8FC546F4F095 /* Pods_Orma.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A60025D809A470B4852356E /* Pods_Orma.framework */; };
+		92469A04B5489B3254EBE655 /* Pods_OrmaTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9374B5C1F774A8336059C14 /* Pods_OrmaTests.framework */; };
+		B44C59BE2E48360E0074C699 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59BD2E48360E0074C699 /* FirebaseAI */; };
+		B44C59C02E48360E0074C699 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59BF2E48360E0074C699 /* FirebaseAnalytics */; };
+		B44C59C22E48360E0074C699 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59C12E48360E0074C699 /* FirebaseAnalyticsCore */; };
+		B44C59C42E48360E0074C699 /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59C32E48360E0074C699 /* FirebaseAnalyticsIdentitySupport */; };
+		B44C59C62E48360E0074C699 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59C52E48360E0074C699 /* FirebaseAppCheck */; };
+		B47775D92E48372F00C05BEE /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = B47775D82E48372F00C05BEE /* FirebaseAI */; };
+		B47775DB2E48372F00C05BEE /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = B47775DA2E48372F00C05BEE /* FirebaseAnalytics */; };
+		B47775DD2E48372F00C05BEE /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = B47775DC2E48372F00C05BEE /* FirebaseAnalyticsCore */; };
+		B47775DF2E48372F00C05BEE /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = B47775DE2E48372F00C05BEE /* FirebaseAnalyticsIdentitySupport */; };
+		B47775E12E48372F00C05BEE /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = B47775E02E48372F00C05BEE /* FirebaseAppCheck */; };
+		B47775E32E48379000C05BEE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B47775E22E48379000C05BEE /* FirebaseAuth */; };
+		B47775E52E4837B200C05BEE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B47775E42E4837B200C05BEE /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B4B563062E4808D400E98934 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,9 +42,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1A60025D809A470B4852356E /* Pods_Orma.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Orma.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		25B3678B2702D67EE76FBB0A /* Pods_Orma_OrmaUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Orma_OrmaUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		298A01968EC720FDFCB4FB45 /* Pods-OrmaTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrmaTests.debug.xcconfig"; path = "Target Support Files/Pods-OrmaTests/Pods-OrmaTests.debug.xcconfig"; sourceTree = "<group>"; };
+		40D6A4F25836D8D8A8CE0215 /* Pods-Orma.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Orma.debug.xcconfig"; path = "Target Support Files/Pods-Orma/Pods-Orma.debug.xcconfig"; sourceTree = "<group>"; };
+		5EDC74D7913FA2C7613C2BEB /* Pods-Orma.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Orma.release.xcconfig"; path = "Target Support Files/Pods-Orma/Pods-Orma.release.xcconfig"; sourceTree = "<group>"; };
+		93ACE4EB8CC8836B2A54ADD0 /* Pods-Orma-OrmaUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Orma-OrmaUITests.release.xcconfig"; path = "Target Support Files/Pods-Orma-OrmaUITests/Pods-Orma-OrmaUITests.release.xcconfig"; sourceTree = "<group>"; };
+		9DBDD3D0E894FA5A456FA1BF /* Pods-Orma-OrmaUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Orma-OrmaUITests.debug.xcconfig"; path = "Target Support Files/Pods-Orma-OrmaUITests/Pods-Orma-OrmaUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		B44C59B72E482CA50074C699 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B4B562F52E4808D200E98934 /* Orma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Orma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4B563052E4808D400E98934 /* OrmaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrmaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4B5630F2E4808D400E98934 /* OrmaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrmaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF1D0621B1C53AFEF2AECC51 /* Pods-OrmaTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrmaTests.release.xcconfig"; path = "Target Support Files/Pods-OrmaTests/Pods-OrmaTests.release.xcconfig"; sourceTree = "<group>"; };
+		C9374B5C1F774A8336059C14 /* Pods_OrmaTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OrmaTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +80,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B47775D92E48372F00C05BEE /* FirebaseAI in Frameworks */,
+				B47775E52E4837B200C05BEE /* FirebaseFirestore in Frameworks */,
+				2998D70F817A8FC546F4F095 /* Pods_Orma.framework in Frameworks */,
+				B47775DB2E48372F00C05BEE /* FirebaseAnalytics in Frameworks */,
+				B44C59C42E48360E0074C699 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				B47775DD2E48372F00C05BEE /* FirebaseAnalyticsCore in Frameworks */,
+				B44C59BE2E48360E0074C699 /* FirebaseAI in Frameworks */,
+				B47775DF2E48372F00C05BEE /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				B47775E32E48379000C05BEE /* FirebaseAuth in Frameworks */,
+				B44C59C02E48360E0074C699 /* FirebaseAnalytics in Frameworks */,
+				B44C59C62E48360E0074C699 /* FirebaseAppCheck in Frameworks */,
+				B44C59C22E48360E0074C699 /* FirebaseAnalyticsCore in Frameworks */,
+				B47775E12E48372F00C05BEE /* FirebaseAppCheck in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +100,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92469A04B5489B3254EBE655 /* Pods_OrmaTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,12 +108,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				160163AD7D588868C7BCDB3E /* Pods_Orma_OrmaUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		78CC6C65770846554C6241AD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1A60025D809A470B4852356E /* Pods_Orma.framework */,
+				25B3678B2702D67EE76FBB0A /* Pods_Orma_OrmaUITests.framework */,
+				C9374B5C1F774A8336059C14 /* Pods_OrmaTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B4B562EC2E4808D200E98934 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +132,9 @@
 				B4B563082E4808D400E98934 /* OrmaTests */,
 				B4B563122E4808D400E98934 /* OrmaUITests */,
 				B4B562F62E4808D200E98934 /* Products */,
+				ECE02EB420D5B5FB3C69381E /* Pods */,
+				78CC6C65770846554C6241AD /* Frameworks */,
+				B44C59B72E482CA50074C699 /* Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,6 +148,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		ECE02EB420D5B5FB3C69381E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				40D6A4F25836D8D8A8CE0215 /* Pods-Orma.debug.xcconfig */,
+				5EDC74D7913FA2C7613C2BEB /* Pods-Orma.release.xcconfig */,
+				9DBDD3D0E894FA5A456FA1BF /* Pods-Orma-OrmaUITests.debug.xcconfig */,
+				93ACE4EB8CC8836B2A54ADD0 /* Pods-Orma-OrmaUITests.release.xcconfig */,
+				298A01968EC720FDFCB4FB45 /* Pods-OrmaTests.debug.xcconfig */,
+				BF1D0621B1C53AFEF2AECC51 /* Pods-OrmaTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -99,9 +168,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4B563192E4808D400E98934 /* Build configuration list for PBXNativeTarget "Orma" */;
 			buildPhases = (
+				85B5619C61F5D4123AEAC164 /* [CP] Check Pods Manifest.lock */,
 				B4B562F12E4808D200E98934 /* Sources */,
 				B4B562F22E4808D200E98934 /* Frameworks */,
 				B4B562F32E4808D200E98934 /* Resources */,
+				65631AB77B090022BD98C2C4 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -111,8 +182,6 @@
 				B4B562F72E4808D200E98934 /* Orma */,
 			);
 			name = Orma;
-			packageProductDependencies = (
-			);
 			productName = Orma;
 			productReference = B4B562F52E4808D200E98934 /* Orma.app */;
 			productType = "com.apple.product-type.application";
@@ -121,6 +190,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4B5631C2E4808D400E98934 /* Build configuration list for PBXNativeTarget "OrmaTests" */;
 			buildPhases = (
+				CFCC9EDD9E0439DE70CF4D56 /* [CP] Check Pods Manifest.lock */,
 				B4B563012E4808D400E98934 /* Sources */,
 				B4B563022E4808D400E98934 /* Frameworks */,
 				B4B563032E4808D400E98934 /* Resources */,
@@ -134,8 +204,6 @@
 				B4B563082E4808D400E98934 /* OrmaTests */,
 			);
 			name = OrmaTests;
-			packageProductDependencies = (
-			);
 			productName = OrmaTests;
 			productReference = B4B563052E4808D400E98934 /* OrmaTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -144,9 +212,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4B5631F2E4808D400E98934 /* Build configuration list for PBXNativeTarget "OrmaUITests" */;
 			buildPhases = (
+				E4CA53507B9184A1DCAA8145 /* [CP] Check Pods Manifest.lock */,
 				B4B5630B2E4808D400E98934 /* Sources */,
 				B4B5630C2E4808D400E98934 /* Frameworks */,
 				B4B5630D2E4808D400E98934 /* Resources */,
+				1A6A118B82ECAD5434D116EB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -157,8 +227,6 @@
 				B4B563122E4808D400E98934 /* OrmaUITests */,
 			);
 			name = OrmaUITests;
-			packageProductDependencies = (
-			);
 			productName = OrmaUITests;
 			productReference = B4B5630F2E4808D400E98934 /* OrmaUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -195,6 +263,9 @@
 			);
 			mainGroup = B4B562EC2E4808D200E98934;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B4B562F62E4808D200E98934 /* Products */;
 			projectDirPath = "";
@@ -230,6 +301,109 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1A6A118B82ECAD5434D116EB /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Orma-OrmaUITests/Pods-Orma-OrmaUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Orma-OrmaUITests/Pods-Orma-OrmaUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Orma-OrmaUITests/Pods-Orma-OrmaUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		65631AB77B090022BD98C2C4 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Orma/Pods-Orma-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Orma/Pods-Orma-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Orma/Pods-Orma-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		85B5619C61F5D4123AEAC164 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Orma-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CFCC9EDD9E0439DE70CF4D56 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-OrmaTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E4CA53507B9184A1DCAA8145 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Orma-OrmaUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B4B562F12E4808D200E98934 /* Sources */ = {
@@ -306,7 +480,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -321,6 +495,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -369,7 +544,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -378,6 +553,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -390,6 +566,7 @@
 		};
 		B4B5631A2E4808D400E98934 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40D6A4F25836D8D8A8CE0215 /* Pods-Orma.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -408,6 +585,46 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"AppAuth\"",
+					"-framework",
+					"\"AppCheckCore\"",
+					"-framework",
+					"\"CoreGraphics\"",
+					"-framework",
+					"\"CoreText\"",
+					"-framework",
+					"\"FBLPromises\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"GTMAppAuth\"",
+					"-framework",
+					"\"GTMSessionFetcher\"",
+					"-framework",
+					"\"GoogleSignIn\"",
+					"-framework",
+					"\"GoogleSignInSwift\"",
+					"-framework",
+					"\"GoogleUtilities\"",
+					"-framework",
+					"\"LocalAuthentication\"",
+					"-framework",
+					"\"SafariServices\"",
+					"-framework",
+					"\"Security\"",
+					"-framework",
+					"\"SwiftUI\"",
+					"-framework",
+					"\"UIKit\"",
+					"-weak_framework",
+					"\"AuthenticationServices\"",
+					"-weak_framework",
+					"\"DeviceCheck\"",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = logno.Orma;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -418,6 +635,7 @@
 		};
 		B4B5631B2E4808D400E98934 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5EDC74D7913FA2C7613C2BEB /* Pods-Orma.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -436,6 +654,46 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"AppAuth\"",
+					"-framework",
+					"\"AppCheckCore\"",
+					"-framework",
+					"\"CoreGraphics\"",
+					"-framework",
+					"\"CoreText\"",
+					"-framework",
+					"\"FBLPromises\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"GTMAppAuth\"",
+					"-framework",
+					"\"GTMSessionFetcher\"",
+					"-framework",
+					"\"GoogleSignIn\"",
+					"-framework",
+					"\"GoogleSignInSwift\"",
+					"-framework",
+					"\"GoogleUtilities\"",
+					"-framework",
+					"\"LocalAuthentication\"",
+					"-framework",
+					"\"SafariServices\"",
+					"-framework",
+					"\"Security\"",
+					"-framework",
+					"\"SwiftUI\"",
+					"-framework",
+					"\"UIKit\"",
+					"-weak_framework",
+					"\"AuthenticationServices\"",
+					"-weak_framework",
+					"\"DeviceCheck\"",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = logno.Orma;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -446,6 +704,7 @@
 		};
 		B4B5631D2E4808D400E98934 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 298A01968EC720FDFCB4FB45 /* Pods-OrmaTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -464,6 +723,7 @@
 		};
 		B4B5631E2E4808D400E98934 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF1D0621B1C53AFEF2AECC51 /* Pods-OrmaTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -482,6 +742,7 @@
 		};
 		B4B563202E4808D400E98934 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9DBDD3D0E894FA5A456FA1BF /* Pods-Orma-OrmaUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -498,6 +759,7 @@
 		};
 		B4B563212E4808D400E98934 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 93ACE4EB8CC8836B2A54ADD0 /* Pods-Orma-OrmaUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -552,6 +814,80 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B44C59BD2E48360E0074C699 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		B44C59BF2E48360E0074C699 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		B44C59C12E48360E0074C699 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		B44C59C32E48360E0074C699 /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		B44C59C52E48360E0074C699 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		B47775D82E48372F00C05BEE /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		B47775DA2E48372F00C05BEE /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		B47775DC2E48372F00C05BEE /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		B47775DE2E48372F00C05BEE /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		B47775E02E48372F00C05BEE /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		B47775E22E48379000C05BEE /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		B47775E42E4837B200C05BEE /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B4B562ED2E4808D200E98934 /* Project object */;
 }
