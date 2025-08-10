@@ -20,30 +20,31 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         return true
     }
-    
-    func application(_ app: UIApplication,
-                     open url: URL,
-                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-      return GIDSignIn.sharedInstance.handle(url)
+
+    func application(
+        _ app: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        return GIDSignIn.sharedInstance.handle(url)
     }
 }
 
 @main
 struct OrmaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var loginVM = LoginViewModel()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onOpenURL { url in
-
-                }
+                .environmentObject(loginVM)
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }
                 .onAppear {
-                    GIDSignIn.sharedInstance.restorePreviousSignIn {
-                        user, error in
-                        // Check if `user` exists; otherwise, do something with `error`
+                    if let token = KeychainService.getToken() {
+                        loginVM.isLoggedIn = true
                     }
                 }
         }

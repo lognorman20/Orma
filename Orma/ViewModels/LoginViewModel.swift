@@ -17,8 +17,12 @@ class LoginViewModel: ObservableObject {
         LoginService().login { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success(_):
+                case .success(let user):
                     self?.isLoggedIn = true
+                    // TODO: look into this being a security issue
+                    if let token = user.refreshToken {
+                        KeychainService.saveToken(token)
+                    }
                 case .failure(let error):
                     print("Login failed: \(error.localizedDescription)")
                     self?.isLoggedIn = false

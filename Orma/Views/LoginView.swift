@@ -5,19 +5,20 @@
 //  Created by Logan Norman on 8/9/25.
 //
 
-import SwiftUI
 import GoogleSignInSwift
+import SwiftUI
 
 struct LoginView: View {
-    @ObservedObject var viewModel: LoginViewModel
-    
+    @EnvironmentObject var viewModel: LoginViewModel
+
     var body: some View {
         VStack {
             Text("Login")
                 .background(in: .buttonBorder)
                 .font(.title)
-            TextField("Username", text: $viewModel.username)
-            SecureField("Password", text: $viewModel.password)
+            // TODO: add sign in by email/password
+            //            TextField("Username", text: $viewModel.username)
+            //            SecureField("Password", text: $viewModel.password)
             GoogleSignInButton(action: viewModel.login)
         }
         .padding()
@@ -26,6 +27,6 @@ struct LoginView: View {
 
 #Preview {
     @Previewable @State var isLoggedIn = false
-    @Previewable @StateObject var viewModel: LoginViewModel = LoginViewModel()
-    LoginView(viewModel: viewModel)
+    @Previewable @EnvironmentObject var viewModel: LoginViewModel
+    LoginView(viewModel: _viewModel)
 }
