@@ -44,7 +44,8 @@ struct OrmaApp: App {
                 }
                 .onAppear {
                     if let token = KeychainService.getToken() {
-                        loginVM.isLoggedIn = true
+                        // TODO: Reenable remembering login
+                        //                        loginVM.isLoggedIn = true
                     }
                 }
         }
