@@ -144,7 +144,7 @@ struct CreatePostView: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         TextField(
-                            "What does this verse mean to you? How has it impacted your life?",
+                            "What are your key takeaways/thoughts?",
                             text: $description,
                             axis: .vertical
                         )
@@ -254,6 +254,14 @@ struct CreatePostView: View {
                 reference: reference,
                 description: description
             )
+            selectedItem = nil
+            selectedImage = nil
+            description = ""
+            book = ""
+            chapter = 1
+            verseStart = 1
+            verseEnd = 1
+            showToast(message: "Post shared successfully!")
         } catch {
             print("Failed to create post:", error)
             showToast(message: "Failed to create post, try again.")

@@ -17,7 +17,7 @@ class FeedViewModel: ObservableObject {
                 print(
                     "after refreshing the # of posts is \(fetchedPosts.count)"
                 )
-                self?.posts = fetchedPosts
+                self?.posts = fetchedPosts.reversed()
             }
         })
     }

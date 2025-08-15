@@ -18,18 +18,6 @@ struct FeedView: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Text("FeedView ya get me")
-                NavigationLink(
-                    destination: CreatePostView()
-                ) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.blue)
-                }
-            }
-            .padding()
-
             ScrollView {
                 ForEach(feedViewModel.posts, id: \.id) { post in
                     PostView(post: post)

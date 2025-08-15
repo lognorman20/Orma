@@ -16,7 +16,7 @@ struct PostView: View {
             // Image
             Group {
                 if let uiImage = image {
-                    Image(uiImage: image!)
+                    Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
                         .frame(
@@ -38,7 +38,7 @@ struct PostView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 Spacer()
-                Text(post.createdAt, style: .date)
+                Text(timeAgo(from: post.createdAt))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -88,6 +88,20 @@ struct PostView: View {
             PostService().getImage(from: post.imagePath) { image in
                 self.image = image
             }
+        }
+    }
+
+    private func timeAgo(from date: Date) -> String {
+        let secondsAgo = Int(Date().timeIntervalSince(date))
+
+        if secondsAgo < 60 {
+            return "\(secondsAgo)s ago"
+        } else if secondsAgo < 3600 {
+            return "\(secondsAgo / 60)m ago"
+        } else if secondsAgo < 86400 {
+            return "\(secondsAgo / 3600)h ago"
+        } else {
+            return "\(secondsAgo / 86400)d ago"
         }
     }
 }
