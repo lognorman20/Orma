@@ -413,14 +413,14 @@ final class BibleData {
             21: 27, 22: 21,
         ],
     ]
-
+    
     static func validateBook(book: String) -> Bool {
         guard BibleData.bibleVerseMap[book] != nil else {
             return false
         }
         return true
     }
-
+    
     static func validateVerse(book: String, chapter: Int, endVerse: Int) -> Result<
         Void, VerseError
     > {
@@ -435,20 +435,22 @@ final class BibleData {
         }
         return .success(())
     }
-
+    
     static func getMaxVerses(book: String, chapter: Int) -> Int? {
         guard let chapters = BibleData.bibleVerseMap[book],
-            let verses = chapters[chapter]
+              let verses = chapters[chapter]
         else {
             return nil
         }
         return verses
     }
-
+    
     // only call this after the verse has been validated ya get me
-    static func getReferenceForVerse(book: String, chapter: Int, verse: Int)
-        -> String
-    {
-        return "\(book) \(chapter):\(verse)"
+    static func getReferenceForVerse(book: String, chapter: Int, verseStart: Int, verseEnd: Int) -> String {
+        if verseStart == verseEnd {
+            return "\(book) \(chapter):\(verseStart)"
+        } else {
+            return "\(book) \(chapter):\(verseStart)-\(verseEnd)"
+        }
     }
 }

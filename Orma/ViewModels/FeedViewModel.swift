@@ -10,8 +10,15 @@ import SwiftUI
 
 class FeedViewModel: ObservableObject {
     @Published var posts: [Post] = []
-    
-    func getPosts() {
-        
+
+    func refreshPosts() {
+        PostService().getPosts(completion: { [weak self] fetchedPosts in
+            DispatchQueue.main.async {
+                print(
+                    "after refreshing the # of posts is \(fetchedPosts.count)"
+                )
+                self?.posts = fetchedPosts
+            }
+        })
     }
 }

@@ -9,18 +9,29 @@ import SwiftUI
 
 struct PostView: View {
     let post: Post
-    
+    @State private var image: UIImage? = nil
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Image
-            Image(post.imagePath)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 280)
-                .clipped()
-                .cornerRadius(20)
-                .shadow(radius: 5)
-            
+            Group {
+                if let uiImage = image {
+                    Image(uiImage: image!)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(
+                            maxWidth: UIScreen.main.bounds.width * 0.9,
+                            maxHeight: 280
+                        )
+                        .clipped()
+                        .cornerRadius(20)
+                        .shadow(radius: 5)
+                } else {
+                    ProgressView()
+                        .frame(height: 280)
+                }
+            }
+
             // Creator and date
             HStack {
                 Text(post.creatorUsername)
@@ -31,29 +42,27 @@ struct PostView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             // Bible verses (formatted)
-            if !post.verses.isEmpty {
+            if !post.reference.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(post.verses, id: \.id) { clip in
-                            Text(clip.humanReadable())
-                                .font(.footnote)
-                                .padding(.vertical, 6)
-                                .padding(.horizontal, 12)
-                                .background(Color.blue.opacity(0.15))
-                                .foregroundColor(.blue)
-                                .cornerRadius(12)
-                        }
+                        Text(post.reference)
+                            .font(.footnote)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 12)
+                            .background(Color.blue.opacity(0.15))
+                            .foregroundColor(.blue)
+                            .cornerRadius(12)
                     }
                 }
             }
-            
+
             // Description
             Text(post.description)
                 .font(.body)
                 .foregroundColor(.primary)
-            
+
             // Likes and comments count
             HStack {
                 Image(systemName: "heart.fill")
@@ -61,20 +70,25 @@ struct PostView: View {
                 Text("\(post.likedBy.count) likes")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Spacer()
-                
+
                 Text("\(post.comments.count) comments")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
         }
         .padding()
         .background(.ultraThinMaterial)
         .cornerRadius(25)
         .shadow(color: .gray.opacity(0.3), radius: 8, x: 0, y: 4)
         .padding([.horizontal, .top])
+        .onAppear {
+            PostService().getImage(from: post.imagePath) { image in
+                self.image = image
+            }
+        }
     }
 }
 
@@ -85,11 +99,7 @@ struct PostView: View {
         creatorUsername: "logan_norman",
         createdAt: Date(),
         imagePath: "logan_hs",
-        verses: [
-            BibleClip(
-                id: "v1", book: "Matthew", chapter: 5, startVerse: 3,
-                endVerse: 10)
-        ],
+        reference: "Matthew 5:3-10",
         likedBy: ["user456", "user123"],
         description: "This is a sample post description for preview purposes.",
         comments: [
@@ -109,14 +119,7 @@ struct PostView: View {
         creatorUsername: "another_user",
         createdAt: Date().addingTimeInterval(-86400),
         imagePath: "log_spread",
-        verses: [
-            BibleClip(
-                id: "v2", book: "John", chapter: 3, startVerse: 16, endVerse: 17
-            ),
-            BibleClip(
-                id: "v3", book: "John", chapter: 3, startVerse: 18, endVerse: 18
-            ),
-        ],
+        reference: "John 3:16-17, John 3:18",
         likedBy: [],
         description: "Another post sharing a powerful verse.",
         comments: []
@@ -128,11 +131,7 @@ struct PostView: View {
         creatorUsername: "faith_fan",
         createdAt: Date().addingTimeInterval(-3600 * 5),
         imagePath: "faith_pic",
-        verses: [
-            BibleClip(
-                id: "v4", book: "Psalm", chapter: 23, startVerse: 1, endVerse: 4
-            )
-        ],
+        reference: "Psalm 23:1-4",
         likedBy: ["user789"],
         description: "Psalm 23 always brings me peace.",
         comments: [

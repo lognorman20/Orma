@@ -9,7 +9,7 @@ import GoogleSignInSwift
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject var viewModel: LoginViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
 
     var body: some View {
         VStack {
@@ -19,7 +19,7 @@ struct LoginView: View {
             // TODO: add sign in by email/password
             //            TextField("Username", text: $viewModel.username)
             //            SecureField("Password", text: $viewModel.password)
-            GoogleSignInButton(action: viewModel.login)
+            GoogleSignInButton(action: loginViewModel.login)
         }
         .padding()
     }
@@ -28,5 +28,5 @@ struct LoginView: View {
 #Preview {
     @Previewable @State var isLoggedIn = false
     @Previewable @EnvironmentObject var viewModel: LoginViewModel
-    LoginView(viewModel: _viewModel)
+    LoginView(loginViewModel: _viewModel)
 }

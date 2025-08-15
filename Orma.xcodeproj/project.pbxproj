@@ -10,6 +10,8 @@
 		160163AD7D588868C7BCDB3E /* Pods_Orma_OrmaUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25B3678B2702D67EE76FBB0A /* Pods_Orma_OrmaUITests.framework */; };
 		2998D70F817A8FC546F4F095 /* Pods_Orma.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A60025D809A470B4852356E /* Pods_Orma.framework */; };
 		92469A04B5489B3254EBE655 /* Pods_OrmaTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9374B5C1F774A8336059C14 /* Pods_OrmaTests.framework */; };
+		B4253D6E2E4EDB4B008AEE67 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B4253D6D2E4EDB4B008AEE67 /* FirebaseStorage */; };
+		B4253D702E4EE2E3008AEE67 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = B4253D6F2E4EE2E3008AEE67 /* FirebaseDatabase */; };
 		B44C59BE2E48360E0074C699 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59BD2E48360E0074C699 /* FirebaseAI */; };
 		B44C59C02E48360E0074C699 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59BF2E48360E0074C699 /* FirebaseAnalytics */; };
 		B44C59C22E48360E0074C699 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = B44C59C12E48360E0074C699 /* FirebaseAnalyticsCore */; };
@@ -80,6 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4253D702E4EE2E3008AEE67 /* FirebaseDatabase in Frameworks */,
 				B47775D92E48372F00C05BEE /* FirebaseAI in Frameworks */,
 				B47775E52E4837B200C05BEE /* FirebaseFirestore in Frameworks */,
 				2998D70F817A8FC546F4F095 /* Pods_Orma.framework in Frameworks */,
@@ -91,6 +94,7 @@
 				B47775E32E48379000C05BEE /* FirebaseAuth in Frameworks */,
 				B44C59C02E48360E0074C699 /* FirebaseAnalytics in Frameworks */,
 				B44C59C62E48360E0074C699 /* FirebaseAppCheck in Frameworks */,
+				B4253D6E2E4EDB4B008AEE67 /* FirebaseStorage in Frameworks */,
 				B44C59C22E48360E0074C699 /* FirebaseAnalyticsCore in Frameworks */,
 				B47775E12E48372F00C05BEE /* FirebaseAppCheck in Frameworks */,
 			);
@@ -827,6 +831,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B4253D6D2E4EDB4B008AEE67 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		B4253D6F2E4EE2E3008AEE67 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
 		B44C59BD2E48360E0074C699 /* FirebaseAI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B44C59BC2E48360E0074C699 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

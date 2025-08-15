@@ -9,12 +9,14 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: LoginViewModel
+    @ObservedObject var ormaUser = OrmaUser.shared
+    
     var body: some View {
         NavigationView {
-            if viewModel.isLoggedIn {
+            if ormaUser.user != nil {
                 FeedView()
             } else {
-                LoginView(viewModel: _viewModel)
+                LoginView(loginViewModel: _viewModel)
             }
         }
     }

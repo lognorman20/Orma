@@ -165,7 +165,11 @@ struct CreatePostView: View {
 
                 // Action Buttons
                 VStack(spacing: 12) {
-                    Button(action: submitPost) {
+                    Button(action: {
+                        Task {
+                            await submitPost()
+                        }
+                    }) {
                         HStack(spacing: 8) {
                             Image(systemName: "paperplane.fill")
                                 .font(.body)
@@ -217,9 +221,8 @@ struct CreatePostView: View {
     }
 
     // touches the view model to store the post in firebase
-    func submitPost() {
-        // Validate image
-        guard selectedImage != nil else {
+    func submitPost() async {
+        guard let image = selectedImage else {
             showToast(
                 message:
                     "add a pic lil bro. i know ur chopped but u can still show out for the chuzz (church huzz)"
@@ -227,20 +230,34 @@ struct CreatePostView: View {
             return
         }
 
-        // Validate Bible verse
         let result = BibleData.validateVerse(
-            book: book, chapter: chapter, endVerse: verseEnd)
+            book: book, chapter: chapter, endVerse: verseEnd
+        )
 
         switch result {
         case .success:
-            break  // valid verse, continue
+            break
         case .failure(let error):
             print("Verse validation failed:", error)
             showToast(message: "nah twin that's not a valid bible verse")
             return
         }
-        // Proceed with post submission
-        print("Post is valid! Submit to Firebase here.")
+
+        let reference = BibleData.getReferenceForVerse(
+            book: book, chapter: chapter, verseStart: verseStart,
+            verseEnd: verseEnd
+        )
+
+        do {
+            try await CreatePostViewModel().createPost(
+                image: image,
+                reference: reference,
+                description: description
+            )
+        } catch {
+            print("Failed to create post:", error)
+            showToast(message: "Failed to create post, try again.")
+        }
     }
 
     func showToast(message: String) {
