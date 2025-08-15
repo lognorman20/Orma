@@ -29,4 +29,34 @@ class LoginViewModel: ObservableObject {
             }
         }
     }
+
+    func login(email: String, password: String) {
+        LoginService().emailLogin(email: email, password: password) { result in
+            switch result {
+            case .success(let user):
+                KeychainService.saveUser(user)
+                OrmaUser.shared.user = user
+                print("Login successful for UID: \(user.uid)")
+            case .failure(let error):
+                print("Login failed: \(error.localizedDescription)")
+            }
+        }
+
+    }
+
+    func signOut() {
+        LoginService().signOut { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    OrmaUser.shared.user = nil
+                    KeychainService.clearAll()
+                    print("User signed out successfully.")
+                case .failure(let error):
+                    print("Sign-out failed: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
 }

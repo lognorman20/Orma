@@ -14,7 +14,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             if ormaUser.user != nil {
-                MainTabView()
+                MainTabView(loginViewModel: _viewModel)
             } else {
                 LoginView(loginViewModel: _viewModel)
             }

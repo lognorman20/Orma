@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @EnvironmentObject var loginViewModel: LoginViewModel
+    
     var body: some View {
         TabView {
             NavigationStack {
@@ -25,7 +27,7 @@ struct MainTabView: View {
             }
 
             NavigationStack {
-                ProfileView()
+                ProfileView(loginViewModel: _loginViewModel)
             }
             .tabItem {
                 Image(systemName: "person.crop.circle.fill")
