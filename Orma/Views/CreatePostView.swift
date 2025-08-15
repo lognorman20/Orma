@@ -17,6 +17,7 @@ struct CreatePostView: View {
     @State var verseStart: Int = 1
     @State var verseEnd: Int = 1
     @State private var showToast: Bool = false
+    @State private var showImagePicker: Bool = false
     @State private var toastMessage: String = ""
 
     var body: some View {
@@ -47,10 +48,9 @@ struct CreatePostView: View {
                     }
 
                     VStack {
-                        PhotosPicker(
-                            selection: $selectedItem,
-                            matching: .images
-                        ) {
+                        Button(action: {
+                            showImagePicker = true
+                        }) {
                             HStack(spacing: 12) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.title2)
@@ -78,31 +78,15 @@ struct CreatePostView: View {
                             .padding(.vertical, 16)
                             .background(
                                 LinearGradient(
-                                    colors: [
-                                        Color.accentColor,
-                                        Color.accentColor.opacity(0.8),
-                                    ],
+                                    colors: [Color.accentColor, Color.accentColor.opacity(0.8)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
                             .cornerRadius(12)
-                            .shadow(
-                                color: Color.accentColor.opacity(0.3),
-                                radius: 8, x: 0, y: 4)
-                        }
-                        .onChange(of: selectedItem) { _, newItem in
-                            Task {
-                                if let data = try? await newItem?
-                                    .loadTransferable(type: Data.self),
-                                    let uiImage = UIImage(data: data)
-                                {
-                                    selectedImage = uiImage
-                                }
-                            }
+                            .shadow(color: Color.accentColor.opacity(0.3), radius: 8, x: 0, y: 4)
                         }
 
-                        // Preview the selected image
                         if let image = selectedImage {
                             Image(uiImage: image)
                                 .resizable()
@@ -112,6 +96,10 @@ struct CreatePostView: View {
                                 .padding(.top)
                         }
                     }
+                    .sheet(isPresented: $showImagePicker) {
+                        PhotoPickerWithCrop(image: $selectedImage)
+                    }
+
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 20)
