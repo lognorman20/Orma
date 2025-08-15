@@ -9,16 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: LoginViewModel
-    
     var body: some View {
-        if viewModel.isLoggedIn {
-            FeedView()
-        } else {
-            LoginView(viewModel: _viewModel)
+        NavigationView {
+            if viewModel.isLoggedIn {
+                FeedView()
+            } else {
+                LoginView(viewModel: _viewModel)
+            }
         }
     }
 }
 
 #Preview {
-    ContentView()
+    @Previewable @EnvironmentObject var viewModel: LoginViewModel
+    ContentView(viewModel: _viewModel)
 }
