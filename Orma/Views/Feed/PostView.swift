@@ -14,31 +14,43 @@ struct PostView: View {
     @State private var isLiked = false
     @State private var likeCount: Int = 0
     @State private var showFullDescription = false
-    
+
     private let gradients = [
-        LinearGradient(colors: [.pink, .orange], startPoint: .topLeading, endPoint: .bottomTrailing),
-        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing),
-        LinearGradient(colors: [.green, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing),
-        LinearGradient(colors: [.red, .pink], startPoint: .topLeading, endPoint: .bottomTrailing),
-        LinearGradient(colors: [.yellow, .orange], startPoint: .topLeading, endPoint: .bottomTrailing)
+        LinearGradient(
+            colors: [.pink, .orange], startPoint: .topLeading,
+            endPoint: .bottomTrailing),
+        LinearGradient(
+            colors: [.blue, .purple], startPoint: .topLeading,
+            endPoint: .bottomTrailing),
+        LinearGradient(
+            colors: [.green, .cyan], startPoint: .topLeading,
+            endPoint: .bottomTrailing),
+        LinearGradient(
+            colors: [.red, .pink], startPoint: .topLeading,
+            endPoint: .bottomTrailing),
+        LinearGradient(
+            colors: [.yellow, .orange], startPoint: .topLeading,
+            endPoint: .bottomTrailing),
     ]
-    
+
     private let gradientColors: [[Color]] = [
         [.red, .orange],
         [.blue, .purple],
-        [.green, .yellow]
+        [.green, .yellow],
     ]
 
     private var userGradient: LinearGradient {
         let index = abs(post.creatorUsername.hashValue) % gradientColors.count
-        return LinearGradient(colors: gradientColors[index], startPoint: .topLeading, endPoint: .bottomTrailing)
+        return LinearGradient(
+            colors: gradientColors[index], startPoint: .topLeading,
+            endPoint: .bottomTrailing)
     }
 
     private var userGradientFirstColor: Color {
         let index = abs(post.creatorUsername.hashValue) % gradientColors.count
         return gradientColors[index].first ?? .blue
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Compact header
@@ -49,54 +61,58 @@ struct PostView: View {
                     .frame(width: 36, height: 36)
                     .overlay {
                         Text(String(post.creatorUsername.prefix(1)))
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(
+                                .system(
+                                    size: 14, weight: .bold, design: .rounded)
+                            )
                             .foregroundColor(.white)
                     }
                     .overlay {
                         Circle()
                             .stroke(.white.opacity(0.3), lineWidth: 1)
                     }
-                
+
                 VStack(alignment: .leading, spacing: 1) {
                     Text(post.creatorUsername)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .font(
+                            .system(
+                                size: 14, weight: .semibold, design: .rounded)
+                        )
                         .foregroundColor(.primary)
-                    
+
                     Text(timeAgo(from: post.createdAt))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
-                // Bible verse chip (if available)
-                if !post.reference.isEmpty {
-                    Button(action: { showVerseModal = true }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "book.fill")
-                                .font(.system(size: 9, weight: .bold))
-                            Text(post.reference.components(separatedBy: ",").first ?? post.reference)
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .lineLimit(1)
-                        }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background {
-                            Capsule()
-                                .fill(LinearGradient(
-                                    colors: [.indigo, .purple],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ))
-                        }
+
+                // Bible verse chip
+                Button(action: {
+                    print("swiss cheese")
+                }) {
+                    Button(action: {
+                        print("SPOTEMGOTEM")
+                        showVerseModal = true
+                    }) {
+                        Text(post.reference)
+                            .font(.footnote)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 12)
+                            .background(Color.blue.opacity(0.15))
+                            .foregroundColor(.blue)
+                            .cornerRadius(12)
                     }
+                    .contentShape(Rectangle())
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
             }
             .padding(.horizontal, 16)
             .padding(.top, 12)
             .padding(.bottom, 8)
-            
+
             // Compact image section
             ZStack {
                 Group {
@@ -108,11 +124,15 @@ struct PostView: View {
                             .clipped()
                     } else {
                         RoundedRectangle(cornerRadius: 0)
-                            .fill(LinearGradient(
-                                colors: [.gray.opacity(0.1), .gray.opacity(0.2)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        .gray.opacity(0.1), .gray.opacity(0.2),
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .frame(height: 200)
                             .overlay {
                                 ProgressView()
@@ -121,7 +141,7 @@ struct PostView: View {
                     }
                 }
             }
-            
+
             // Compact content section
             VStack(spacing: 10) {
                 // Description
@@ -132,26 +152,31 @@ struct PostView: View {
                             .foregroundColor(.primary)
                             .lineLimit(showFullDescription ? nil : 2)
                             .multilineTextAlignment(.leading)
-                        
+
                         Spacer()
-                        
+
                         if post.description.count > 80 {
                             Button(action: { showFullDescription.toggle() }) {
-                                Image(systemName: showFullDescription ? "chevron.up" : "chevron.down")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.blue)
-                                    .frame(width: 16, height: 16)
-                                    .background(Circle().fill(.blue.opacity(0.1)))
+                                Image(
+                                    systemName: showFullDescription
+                                        ? "chevron.up" : "chevron.down"
+                                )
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.blue)
+                                .frame(width: 16, height: 16)
+                                .background(Circle().fill(.blue.opacity(0.1)))
                             }
                         }
                     }
                 }
-                
+
                 // Colorful interaction bar
                 HStack(spacing: 16) {
                     // Like button with gradient
                     Button(action: {
-                        withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                        withAnimation(
+                            .spring(response: 0.2, dampingFraction: 0.7)
+                        ) {
                             isLiked.toggle()
                             likeCount += isLiked ? 1 : -1
                         }
@@ -159,46 +184,75 @@ struct PostView: View {
                         HStack(spacing: 4) {
                             ZStack {
                                 Circle()
-                                    .fill(isLiked ?
-                                          LinearGradient(colors: [.pink, .red], startPoint: .topLeading, endPoint: .bottomTrailing) :
-                                          LinearGradient(colors: [.gray.opacity(0.2), .gray.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    .fill(
+                                        isLiked
+                                            ? LinearGradient(
+                                                colors: [.pink, .red],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing)
+                                            : LinearGradient(
+                                                colors: [
+                                                    .gray.opacity(0.2),
+                                                    .gray.opacity(0.1),
+                                                ], startPoint: .topLeading,
+                                                endPoint: .bottomTrailing)
                                     )
                                     .frame(width: 28, height: 28)
-                                
-                                Image(systemName: isLiked ? "heart.fill" : "heart")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(isLiked ? .white : .primary)
-                                    .scaleEffect(isLiked ? 1.1 : 1.0)
+
+                                Image(
+                                    systemName: isLiked ? "heart.fill" : "heart"
+                                )
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(isLiked ? .white : .primary)
+                                .scaleEffect(isLiked ? 1.1 : 1.0)
                             }
-                            
+
                             Text("\(likeCount)")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .font(
+                                    .system(
+                                        size: 12, weight: .bold,
+                                        design: .rounded)
+                                )
                                 .foregroundColor(.primary)
                         }
                     }
-                    
+
                     // Comment button with gradient
                     Button(action: {}) {
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.blue, .cyan],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing)
+                                )
                                 .frame(width: 28, height: 28)
                                 .overlay {
                                     Image(systemName: "bubble.right.fill")
                                         .font(.system(size: 12, weight: .bold))
                                         .foregroundColor(.white)
                                 }
-                            
+
                             Text("\(post.comments.count)")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .font(
+                                    .system(
+                                        size: 12, weight: .bold,
+                                        design: .rounded)
+                                )
                                 .foregroundColor(.primary)
                         }
                     }
-                    
+
                     // Share button with gradient
                     Button(action: {}) {
                         Circle()
-                            .fill(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .fill(
+                                LinearGradient(
+                                    colors: [.green, .mint],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing)
+                            )
                             .frame(width: 28, height: 28)
                             .overlay {
                                 Image(systemName: "paperplane.fill")
@@ -206,13 +260,18 @@ struct PostView: View {
                                     .foregroundColor(.white)
                             }
                     }
-                    
+
                     Spacer()
-                    
+
                     // Bookmark button with gradient
                     Button(action: {}) {
                         Circle()
-                            .fill(LinearGradient(colors: [.orange, .yellow], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .fill(
+                                LinearGradient(
+                                    colors: [.orange, .yellow],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing)
+                            )
                             .frame(width: 28, height: 28)
                             .overlay {
                                 Image(systemName: "bookmark.fill")
@@ -232,7 +291,10 @@ struct PostView: View {
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(
                             LinearGradient(
-                                colors: [.white.opacity(0.3), .clear, .black.opacity(0.1)],
+                                colors: [
+                                    .white.opacity(0.3), .clear,
+                                    .black.opacity(0.1),
+                                ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -260,10 +322,10 @@ struct PostView: View {
             VerseModal(isPresented: $showVerseModal, reference: post.reference)
         }
     }
-    
+
     private func timeAgo(from date: Date) -> String {
         let secondsAgo = Int(Date().timeIntervalSince(date))
-        
+
         if secondsAgo < 60 {
             return "\(secondsAgo)s"
         } else if secondsAgo < 3600 {
@@ -286,7 +348,8 @@ struct PostView: View {
         creatorId: "user789",
         creatorUsername: "logan_norman",
         createdAt: Date(),
-        imagePath: "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
+        imagePath:
+            "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "Matthew 5:3-10",
         likedBy: ["user456", "user123"],
         description: "This is a sample post description for preview purposes.",
@@ -306,7 +369,8 @@ struct PostView: View {
         creatorId: "user123",
         creatorUsername: "another_user",
         createdAt: Date().addingTimeInterval(-86400),
-        imagePath: "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
+        imagePath:
+            "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "John 3:16-17, John 3:18",
         likedBy: [],
         description: "Another post sharing a powerful verse.",
@@ -318,7 +382,8 @@ struct PostView: View {
         creatorId: "user555",
         creatorUsername: "faith_fan",
         createdAt: Date().addingTimeInterval(-3600 * 5),
-        imagePath: "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
+        imagePath:
+            "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "Psalm 23:1-4",
         likedBy: ["user789"],
         description: "Psalm 23 always brings me peace.",
