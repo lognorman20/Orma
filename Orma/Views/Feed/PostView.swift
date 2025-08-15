@@ -55,7 +55,6 @@ struct PostView: View {
         VStack(spacing: 0) {
             // Compact header
             HStack(spacing: 10) {
-                // Colorful profile avatar
                 Circle()
                     .fill(userGradient)
                     .frame(width: 36, height: 36)
@@ -87,27 +86,35 @@ struct PostView: View {
 
                 Spacer()
 
-                // Bible verse chip
                 Button(action: {
-                    print("swiss cheese")
+                    showVerseModal = true
                 }) {
-                    Button(action: {
-                        print("SPOTEMGOTEM")
-                        showVerseModal = true
-                    }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "book.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(userGradientFirstColor)
+
                         Text(post.reference)
-                            .font(.footnote)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Color.blue.opacity(0.15))
-                            .foregroundColor(.blue)
-                            .cornerRadius(12)
+                            .font(.footnote.weight(.medium))
+                            .lineLimit(1)
+                            .foregroundColor(userGradientFirstColor)
                     }
-                    .contentShape(Rectangle())
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                userGradientFirstColor.opacity(0.2),
+                                userGradientFirstColor.opacity(0.1),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(12)
+
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+                .contentShape(Rectangle())
             }
             .padding(.horizontal, 16)
             .padding(.top, 12)
@@ -148,137 +155,54 @@ struct PostView: View {
                 if !post.description.isEmpty {
                     HStack {
                         Text(post.description)
-                            .font(.system(size: 13, weight: .regular))
+                            .font(.system(size: 15, weight: .regular))
                             .foregroundColor(.primary)
-                            .lineLimit(showFullDescription ? nil : 2)
+                            .lineLimit(showFullDescription ? nil : 8)
                             .multilineTextAlignment(.leading)
 
                         Spacer()
-
-                        if post.description.count > 80 {
-                            Button(action: { showFullDescription.toggle() }) {
-                                Image(
-                                    systemName: showFullDescription
-                                        ? "chevron.up" : "chevron.down"
-                                )
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(.blue)
-                                .frame(width: 16, height: 16)
-                                .background(Circle().fill(.blue.opacity(0.1)))
-                            }
-                        }
                     }
                 }
 
                 // Colorful interaction bar
                 HStack(spacing: 16) {
-                    // Like button with gradient
+                    // Like button (red)
                     Button(action: {
-                        withAnimation(
-                            .spring(response: 0.2, dampingFraction: 0.7)
-                        ) {
+                        withAnimation {
+                            // ref do something
                             isLiked.toggle()
-                            likeCount += isLiked ? 1 : -1
                         }
                     }) {
-                        HStack(spacing: 4) {
-                            ZStack {
-                                Circle()
-                                    .fill(
-                                        isLiked
-                                            ? LinearGradient(
-                                                colors: [.pink, .red],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing)
-                                            : LinearGradient(
-                                                colors: [
-                                                    .gray.opacity(0.2),
-                                                    .gray.opacity(0.1),
-                                                ], startPoint: .topLeading,
-                                                endPoint: .bottomTrailing)
-                                    )
-                                    .frame(width: 28, height: 28)
-
-                                Image(
-                                    systemName: isLiked ? "heart.fill" : "heart"
-                                )
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(isLiked ? .white : .primary)
-                                .scaleEffect(isLiked ? 1.1 : 1.0)
-                            }
-
-                            Text("\(likeCount)")
-                                .font(
-                                    .system(
-                                        size: 12, weight: .bold,
-                                        design: .rounded)
-                                )
-                                .foregroundColor(.primary)
-                        }
+                        Image(systemName: isLiked ? "heart.fill" : "heart")
+                            .font(.system(size: 12, weight: .bold))
                     }
+                    .buttonStyle(GradientCircleButton(
+                        gradient: LinearGradient(colors: [.red, .pink], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        isToggle: true,
+                        isActive: .constant(true)
+                    ))
 
-                    // Comment button with gradient
+                    // Comment button (blue)
                     Button(action: {}) {
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.blue, .cyan],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing)
-                                )
-                                .frame(width: 28, height: 28)
-                                .overlay {
-                                    Image(systemName: "bubble.right.fill")
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(.white)
-                                }
-
-                            Text("\(post.comments.count)")
-                                .font(
-                                    .system(
-                                        size: 12, weight: .bold,
-                                        design: .rounded)
-                                )
-                                .foregroundColor(.primary)
-                        }
+                        Image(systemName: "bubble.right.fill")
+                            .font(.system(size: 12, weight: .bold))
                     }
+                    .buttonStyle(GradientCircleButton(
+                        gradient: LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        isActive: .constant(true)
+                    ))
 
-                    // Share button with gradient
+                    // Share button (green)
                     Button(action: {}) {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.green, .mint],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing)
-                            )
-                            .frame(width: 28, height: 28)
-                            .overlay {
-                                Image(systemName: "paperplane.fill")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 12, weight: .bold))
                     }
+                    .buttonStyle(GradientCircleButton(
+                        gradient: LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        isActive: .constant(true)
+                    ))
 
                     Spacer()
-
-                    // Bookmark button with gradient
-                    Button(action: {}) {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.orange, .yellow],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing)
-                            )
-                            .frame(width: 28, height: 28)
-                            .overlay {
-                                Image(systemName: "bookmark.fill")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                    }
                 }
             }
             .padding(.horizontal, 16)
@@ -373,7 +297,7 @@ struct PostView: View {
             "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "John 3:16-17, John 3:18",
         likedBy: [],
-        description: "Another post sharing a powerful verse.",
+        description: "Another post sharing a powerful verse. I just drop bars spin out in foreign cars and i look up at the star. You can see me from afar still shining like i'm from mars",
         comments: []
     )
 
