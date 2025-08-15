@@ -10,7 +10,8 @@ import SwiftUI
 struct PostView: View {
     let post: Post
     @State private var image: UIImage? = nil
-
+    @State private var showVerseModal = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Image
@@ -56,6 +57,9 @@ struct PostView: View {
                             .cornerRadius(12)
                     }
                 }
+                .onTapGesture {
+                    showVerseModal = true
+                }
             }
 
             // Description
@@ -89,6 +93,9 @@ struct PostView: View {
                 self.image = image
             }
         }
+        .sheet(isPresented: $showVerseModal) {
+            VerseModal(isPresented: $showVerseModal, reference: post.reference)
+        }
     }
 
     private func timeAgo(from date: Date) -> String {
@@ -112,7 +119,7 @@ struct PostView: View {
         creatorId: "user789",
         creatorUsername: "logan_norman",
         createdAt: Date(),
-        imagePath: "logan_hs",
+        imagePath: "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "Matthew 5:3-10",
         likedBy: ["user456", "user123"],
         description: "This is a sample post description for preview purposes.",
@@ -132,7 +139,7 @@ struct PostView: View {
         creatorId: "user123",
         creatorUsername: "another_user",
         createdAt: Date().addingTimeInterval(-86400),
-        imagePath: "log_spread",
+        imagePath: "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "John 3:16-17, John 3:18",
         likedBy: [],
         description: "Another post sharing a powerful verse.",
@@ -144,7 +151,7 @@ struct PostView: View {
         creatorId: "user555",
         creatorUsername: "faith_fan",
         createdAt: Date().addingTimeInterval(-3600 * 5),
-        imagePath: "faith_pic",
+        imagePath: "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
         reference: "Psalm 23:1-4",
         likedBy: ["user789"],
         description: "Psalm 23 always brings me peace.",
