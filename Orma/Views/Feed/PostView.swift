@@ -11,104 +11,271 @@ struct PostView: View {
     let post: Post
     @State private var image: UIImage? = nil
     @State private var showVerseModal = false
+    @State private var isLiked = false
+    @State private var likeCount: Int = 0
+    @State private var showFullDescription = false
+    
+    private let gradients = [
+        LinearGradient(colors: [.pink, .orange], startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(colors: [.green, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(colors: [.red, .pink], startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(colors: [.yellow, .orange], startPoint: .topLeading, endPoint: .bottomTrailing)
+    ]
+    
+    private let gradientColors: [[Color]] = [
+        [.red, .orange],
+        [.blue, .purple],
+        [.green, .yellow]
+    ]
+
+    private var userGradient: LinearGradient {
+        let index = abs(post.creatorUsername.hashValue) % gradientColors.count
+        return LinearGradient(colors: gradientColors[index], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    private var userGradientFirstColor: Color {
+        let index = abs(post.creatorUsername.hashValue) % gradientColors.count
+        return gradientColors[index].first ?? .blue
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Image
-            Group {
-                if let uiImage = image {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(
-                            maxWidth: UIScreen.main.bounds.width * 0.9,
-                            maxHeight: 280
-                        )
-                        .clipped()
-                        .cornerRadius(20)
-                        .shadow(radius: 5)
-                } else {
-                    ProgressView()
-                        .frame(height: 280)
+        VStack(spacing: 0) {
+            // Compact header
+            HStack(spacing: 10) {
+                // Colorful profile avatar
+                Circle()
+                    .fill(userGradient)
+                    .frame(width: 36, height: 36)
+                    .overlay {
+                        Text(String(post.creatorUsername.prefix(1)))
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .overlay {
+                        Circle()
+                            .stroke(.white.opacity(0.3), lineWidth: 1)
+                    }
+                
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(post.creatorUsername)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primary)
+                    
+                    Text(timeAgo(from: post.createdAt))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
                 }
-            }
-
-            // Creator and date
-            HStack {
-                Text(post.creatorUsername)
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                
                 Spacer()
-                Text(timeAgo(from: post.createdAt))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            // Bible verses (formatted)
-            if !post.reference.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        Text(post.reference)
-                            .font(.footnote)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Color.blue.opacity(0.15))
-                            .foregroundColor(.blue)
-                            .cornerRadius(12)
+                
+                // Bible verse chip (if available)
+                if !post.reference.isEmpty {
+                    Button(action: { showVerseModal = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "book.fill")
+                                .font(.system(size: 9, weight: .bold))
+                            Text(post.reference.components(separatedBy: ",").first ?? post.reference)
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .lineLimit(1)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background {
+                            Capsule()
+                                .fill(LinearGradient(
+                                    colors: [.indigo, .purple],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ))
+                        }
                     }
                 }
-                .onTapGesture {
-                    showVerseModal = true
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            
+            // Compact image section
+            ZStack {
+                Group {
+                    if let uiImage = image {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 200)
+                            .clipped()
+                    } else {
+                        RoundedRectangle(cornerRadius: 0)
+                            .fill(LinearGradient(
+                                colors: [.gray.opacity(0.1), .gray.opacity(0.2)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(height: 200)
+                            .overlay {
+                                ProgressView()
+                                    .tint(.blue)
+                            }
+                    }
                 }
             }
-
-            // Description
-            Text(post.description)
-                .font(.body)
-                .foregroundColor(.primary)
-
-            // Likes and comments count
-            HStack {
-                Image(systemName: "heart.fill")
-                    .foregroundColor(.red)
-                Text("\(post.likedBy.count) likes")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                Text("\(post.comments.count) comments")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            
+            // Compact content section
+            VStack(spacing: 10) {
+                // Description
+                if !post.description.isEmpty {
+                    HStack {
+                        Text(post.description)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(.primary)
+                            .lineLimit(showFullDescription ? nil : 2)
+                            .multilineTextAlignment(.leading)
+                        
+                        Spacer()
+                        
+                        if post.description.count > 80 {
+                            Button(action: { showFullDescription.toggle() }) {
+                                Image(systemName: showFullDescription ? "chevron.up" : "chevron.down")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(.blue)
+                                    .frame(width: 16, height: 16)
+                                    .background(Circle().fill(.blue.opacity(0.1)))
+                            }
+                        }
+                    }
+                }
+                
+                // Colorful interaction bar
+                HStack(spacing: 16) {
+                    // Like button with gradient
+                    Button(action: {
+                        withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                            isLiked.toggle()
+                            likeCount += isLiked ? 1 : -1
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            ZStack {
+                                Circle()
+                                    .fill(isLiked ?
+                                          LinearGradient(colors: [.pink, .red], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                                          LinearGradient(colors: [.gray.opacity(0.2), .gray.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    )
+                                    .frame(width: 28, height: 28)
+                                
+                                Image(systemName: isLiked ? "heart.fill" : "heart")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(isLiked ? .white : .primary)
+                                    .scaleEffect(isLiked ? 1.1 : 1.0)
+                            }
+                            
+                            Text("\(likeCount)")
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    
+                    // Comment button with gradient
+                    Button(action: {}) {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 28, height: 28)
+                                .overlay {
+                                    Image(systemName: "bubble.right.fill")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                            
+                            Text("\(post.comments.count)")
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    
+                    // Share button with gradient
+                    Button(action: {}) {
+                        Circle()
+                            .fill(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 28, height: 28)
+                            .overlay {
+                                Image(systemName: "paperplane.fill")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                    }
+                    
+                    Spacer()
+                    
+                    // Bookmark button with gradient
+                    Button(action: {}) {
+                        Circle()
+                            .fill(LinearGradient(colors: [.orange, .yellow], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 28, height: 28)
+                            .overlay {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                    }
+                }
             }
-
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
         }
-        .padding()
-        .background(.ultraThinMaterial)
-        .cornerRadius(25)
-        .shadow(color: .gray.opacity(0.3), radius: 8, x: 0, y: 4)
-        .padding([.horizontal, .top])
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.3), .clear, .black.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                }
+        }
+        .shadow(
+            color: userGradientFirstColor.opacity(0.15),
+            radius: 8,
+            x: 0,
+            y: 4
+        )
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
         .onAppear {
+            likeCount = post.likedBy.count
             PostService().getImage(from: post.imagePath) { image in
-                self.image = image
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self.image = image
+                }
             }
         }
         .sheet(isPresented: $showVerseModal) {
             VerseModal(isPresented: $showVerseModal, reference: post.reference)
         }
     }
-
+    
     private func timeAgo(from date: Date) -> String {
         let secondsAgo = Int(Date().timeIntervalSince(date))
-
+        
         if secondsAgo < 60 {
-            return "\(secondsAgo)s ago"
+            return "\(secondsAgo)s"
         } else if secondsAgo < 3600 {
-            return "\(secondsAgo / 60)m ago"
+            return "\(secondsAgo / 60)m"
         } else if secondsAgo < 86400 {
-            return "\(secondsAgo / 3600)h ago"
+            return "\(secondsAgo / 3600)h"
+        } else if secondsAgo < 604800 {
+            return "\(secondsAgo / 86400)d"
         } else {
-            return "\(secondsAgo / 86400)d ago"
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
         }
     }
 }
