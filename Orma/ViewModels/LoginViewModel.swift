@@ -18,7 +18,7 @@ class LoginViewModel: ObservableObject {
                 switch result {
                 case .success(let user):
                     OrmaUser.shared.user = user
-                    // TODO: look into this being a security issue
+                    KeychainService.saveUser(user)
                     if let token = user.refreshToken {
                         KeychainService.saveToken(token)
                     }

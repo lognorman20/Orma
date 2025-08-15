@@ -43,9 +43,15 @@ struct OrmaApp: App {
                     GIDSignIn.sharedInstance.handle(url)
                 }
                 .onAppear {
-                    if let token = KeychainService.getToken() {
-                        // TODO: Reenable remembering login
-//                                                loginVM.isLoggedIn = true
+                    if let savedUID = KeychainService.getUserUID() {
+                        if let currentUser = Auth.auth().currentUser,
+                            currentUser.uid == savedUID
+                        {
+                            OrmaUser.shared.user = currentUser
+                        } else {
+                            // Optionally, force re-login or fetch user info from your server if needed
+                            print("User not logged in or UID mismatch")
+                        }
                     }
                 }
         }

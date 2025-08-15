@@ -172,19 +172,6 @@ struct LoginView: View {
                     .padding(.horizontal, 32)
                     
                     Spacer()
-                    
-                    // Footer
-                    VStack(spacing: 8) {
-                        Text("By continuing, you agree to our Terms of Service")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(Color.white.opacity(0.5))
-                            .multilineTextAlignment(.center)
-                        
-                        Text("and Privacy Policy")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(Color.white.opacity(0.5))
-                    }
-                    .padding(.bottom, 20)
                 }
             }
         }
