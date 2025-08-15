@@ -82,4 +82,25 @@ class KeychainService {
         }
         return nil
     }
+
+    static func deleteToken() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: "userToken",
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+
+    static func deleteUserUID() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: "firebaseUserUID",
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+
+    static func clearAll() {
+        deleteUserUID()
+        deleteToken()
+    }
 }
