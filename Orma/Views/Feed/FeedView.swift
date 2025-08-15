@@ -9,24 +9,26 @@ import SwiftUI
 
 struct FeedView: View {
     @StateObject var viewModel: FeedViewModel
-    @State var description: Binding<String>
-    
-    init(viewModel: FeedViewModel = FeedViewModel(), description: Binding<String> = .constant("")) {
+
+    init(
+        viewModel: FeedViewModel = FeedViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        _description = State(wrappedValue: description)
     }
 
     var body: some View {
         VStack {
             HStack {
                 Text("FeedView ya get me")
-                NavigationLink(destination: CreatePostView(description: description)) {
+                NavigationLink(
+                    destination: CreatePostView()
+                ) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title)
                         .foregroundColor(.blue)
                 }
-                .padding()
             }
+            .padding()
+
             ScrollView {
                 ForEach(viewModel.posts, id: \.id) { post in
                     PostView(post: post)

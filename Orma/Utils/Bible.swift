@@ -421,7 +421,7 @@ final class BibleData {
         return true
     }
 
-    static func validateVerse(book: String, chapter: Int, verse: Int) -> Result<
+    static func validateVerse(book: String, chapter: Int, endVerse: Int) -> Result<
         Void, VerseError
     > {
         guard let chapters = bibleVerseMap[book] else {
@@ -430,7 +430,7 @@ final class BibleData {
         guard let max = chapters[chapter] else {
             return .failure(.unknownChapter)
         }
-        guard (1...max).contains(verse) else {
+        guard (1...max).contains(endVerse) else {
             return .failure(.verseOutOfRange(max: max))
         }
         return .success(())
