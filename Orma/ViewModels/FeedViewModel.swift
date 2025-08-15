@@ -21,4 +21,10 @@ class FeedViewModel: ObservableObject {
             }
         })
     }
+    
+    @MainActor
+    func refreshPostsAsync() async {
+        await Task { refreshPosts() }.value
+    }
+
 }
