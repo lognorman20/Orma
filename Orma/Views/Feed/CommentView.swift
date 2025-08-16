@@ -71,24 +71,24 @@ private struct AvatarView: View {
     }
 }
 
-private struct InitialsView: View {
+public struct InitialsView: View {
     let username: String
     
-    private var initials: String {
+    public var initials: String {
         let components = username.components(separatedBy: " ")
         let firstInitial = components.first?.first?.uppercased() ?? ""
         let lastInitial = components.count > 1 ? (components.last?.first?.uppercased() ?? "") : ""
         return firstInitial + lastInitial
     }
     
-    private var backgroundColor: Color {
+    public var backgroundColor: Color {
         // Generate color based on username hash
         let hash = abs(username.hashValue)
         let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .indigo, .teal]
         return colors[hash % colors.count]
     }
     
-    var body: some View {
+    public var body: some View {
         Circle()
             .fill(backgroundColor.gradient)
             .frame(width: 28, height: 28)

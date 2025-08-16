@@ -11,9 +11,11 @@ struct PostView: View {
     let post: Post
     @State private var image: UIImage? = nil
     @State private var showVerseModal = false
+    @State private var showCommentsSheet = false
     @State private var isLiked = false
     @State private var likeCount: Int = 0
     @State private var showFullDescription = false
+    @State private var comments: [Comment] = []
 
     private let gradients = [
         LinearGradient(
@@ -169,7 +171,6 @@ struct PostView: View {
                     // Like button (red)
                     Button(action: {
                         withAnimation {
-                            // ref do something
                             if let currentUser = OrmaUser.shared.user {
                                 PostService().likePost(postId: post.id, userId: currentUser.uid)
                                 isLiked.toggle()
@@ -187,8 +188,10 @@ struct PostView: View {
                         isActive: .constant(true)
                     ))
 
-                    // Comment button (blue)
-                    Button(action: {}) {
+                    // Comment button (blue) - Updated to show comments sheet
+                    Button(action: {
+                        showCommentsSheet = true
+                    }) {
                         Image(systemName: "bubble.right.fill")
                             .font(.system(size: 12, weight: .bold))
                     }
@@ -208,6 +211,13 @@ struct PostView: View {
                     ))
 
                     Spacer()
+                    
+                    // Comment count indicator
+                    if !comments.isEmpty {
+                        Text("\(comments.count) comment\(comments.count == 1 ? "" : "s")")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             .padding(.horizontal, 16)
@@ -240,6 +250,9 @@ struct PostView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .onAppear {
+            // Load existing comments
+            comments = post.comments
+            
             if let currentUser = OrmaUser.shared.user {
                 PostService().isLiked(postId: post.id, userId: currentUser.uid) { liked in
                     isLiked = liked
@@ -255,11 +268,230 @@ struct PostView: View {
         .sheet(isPresented: $showVerseModal) {
             VerseModal(isPresented: $showVerseModal, reference: post.reference)
         }
+        .sheet(isPresented: $showCommentsSheet) {
+            CommentsView(post: post, comments: $comments)
+        }
     }
 
     private func timeAgo(from date: Date) -> String {
         let secondsAgo = Int(Date().timeIntervalSince(date))
 
+        if secondsAgo < 60 {
+            return "\(secondsAgo)s"
+        } else if secondsAgo < 3600 {
+            return "\(secondsAgo / 60)m"
+        } else if secondsAgo < 86400 {
+            return "\(secondsAgo / 3600)h"
+        } else if secondsAgo < 604800 {
+            return "\(secondsAgo / 86400)d"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
+        }
+    }
+}
+
+// MARK: - CommentsView
+struct CommentsView: View {
+    let post: Post
+    @Binding var comments: [Comment]
+    @State private var newCommentText = ""
+    @State private var isSubmittingComment = false
+    @Environment(\.dismiss) private var dismiss
+    
+    private let gradientColors: [[Color]] = [
+        [.red, .orange],
+        [.blue, .purple],
+        [.green, .yellow],
+    ]
+    
+    private func userGradient(for username: String) -> LinearGradient {
+        let index = abs(username.hashValue) % gradientColors.count
+        return LinearGradient(
+            colors: gradientColors[index],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Comments")
+                        .font(.headline)
+                    
+                    Spacer()
+                    
+                    // Invisible button for balance
+                    Button("") {}
+                        .opacity(0)
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                
+                // Comments List
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(comments, id: \.id) { comment in
+                            CommentRow(comment: comment, userGradient: userGradient)
+                        }
+                        
+                        if comments.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "bubble.right")
+                                    .font(.system(size: 40, weight: .light))
+                                    .foregroundColor(.secondary)
+                                
+                                Text("No comments yet")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                
+                                Text("Be the first to share your thoughts!")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.top, 60)
+                        }
+                    }
+                    .padding()
+                }
+                
+                // Comment Input
+                VStack(spacing: 0) {
+                    Divider()
+                    
+                    HStack(spacing: 12) {
+                        // User avatar
+                        if let currentUser = OrmaUser.shared.user {
+                            Circle()
+                                .fill(userGradient(for: currentUser.displayName ?? "Lebron"))
+                                .frame(width: 32, height: 32)
+                                .overlay {
+                                    Text(String(currentUser.displayName!.prefix(1) ?? "Lebron"))
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                }
+                        }
+                        
+                        // Text field
+                        TextField("Add a comment...", text: $newCommentText, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(1...4)
+                        
+                        // Send button
+                        Button(action: submitComment) {
+                            if isSubmittingComment {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "paperplane.fill")
+                                    .foregroundColor(newCommentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .secondary : .blue)
+                            }
+                        }
+                        .disabled(newCommentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmittingComment)
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                }
+            }
+        }
+    }
+    
+    private func submitComment() {
+        guard let currentUser = OrmaUser.shared.user,
+              !newCommentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+        
+        isSubmittingComment = true
+        
+        let newComment = Comment(
+            id: UUID().uuidString,
+            creatorId: currentUser.uid,
+            postId: post.id,
+            createdAt: Date(),
+            text: newCommentText.trimmingCharacters(in: .whitespacesAndNewlines),
+            referenceComment: nil
+        )
+        
+        // Add comment to local state immediately for better UX
+        comments.append(newComment)
+        newCommentText = ""
+        
+        // TODO: Add your actual comment submission logic here
+        // PostService().addComment(comment: newComment) { success in
+        //     DispatchQueue.main.async {
+        //         isSubmittingComment = false
+        //         if !success {
+        //             // Remove the comment if submission failed
+        //             comments.removeAll { $0.id == newComment.id }
+        //         }
+        //     }
+        // }
+        
+        // Simulate API call
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            isSubmittingComment = false
+        }
+    }
+}
+
+// MARK: - CommentRow
+struct CommentRow: View {
+    let comment: Comment
+    let userGradient: (String) -> LinearGradient
+    
+    // Mock username - in real app, you'd fetch this from user service
+    private var username: String {
+        // This is a placeholder - you'd want to fetch the actual username
+        return "user_\(comment.creatorId.suffix(4))"
+    }
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // User avatar
+            Circle()
+                .fill(userGradient(username))
+                .frame(width: 32, height: 32)
+                .overlay {
+                    Text(String(username.prefix(1)))
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(username)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    Text(timeAgo(from: comment.createdAt))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                }
+                
+                Text(comment.text)
+                    .font(.system(size: 14))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+            }
+        }
+    }
+    
+    private func timeAgo(from date: Date) -> String {
+        let secondsAgo = Int(Date().timeIntervalSince(date))
+        
         if secondsAgo < 60 {
             return "\(secondsAgo)s"
         } else if secondsAgo < 3600 {
@@ -328,5 +560,5 @@ struct PostView: View {
         ]
     )
 
-    PostView(post: post2)
+    PostView(post: post3)
 }
