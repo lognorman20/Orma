@@ -3,7 +3,7 @@ import SwiftUI
 struct CommentView: View {
     let comment: Comment
     let isCurrentUser: Bool
-    let username: String
+    let displayName: String
     let avatar: String?  // URL or system name
     let onReply: () -> Void
 
@@ -20,12 +20,12 @@ struct CommentView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Username and timestamp
                     HeaderView(
-                        username: username, timestamp: comment.createdAt,
+                        displayName: displayName, timestamp: comment.createdAt,
                         isCurrentUser: isCurrentUser)
 
                     // Message bubble with avatar
                     HStack(alignment: .center, spacing: 8) {
-                        AvatarView(avatar: avatar, username: username)
+                        AvatarView(avatar: avatar, displayName: displayName)
 
                         MessageBubbleView(
                             text: comment.text,
@@ -52,7 +52,7 @@ struct CommentView: View {
 
 private struct AvatarView: View {
     let avatar: String?
-    let username: String
+    let displayName: String
 
     var body: some View {
         if let avatar = avatar, avatar.starts(with: "http") {
@@ -61,21 +61,21 @@ private struct AvatarView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                InitialsView(username: username)
+                InitialsView(displayName: displayName)
             }
             .frame(width: 28, height: 28)
             .clipShape(Circle())
         } else {
-            InitialsView(username: username)
+            InitialsView(displayName: displayName)
         }
     }
 }
 
 public struct InitialsView: View {
-    let username: String
+    let displayName: String
 
     public var initials: String {
-        let components = username.components(separatedBy: " ")
+        let components = displayName.components(separatedBy: " ")
         let firstInitial = components.first?.first?.uppercased() ?? ""
         let lastInitial =
             components.count > 1
@@ -85,7 +85,7 @@ public struct InitialsView: View {
 
     public var backgroundColor: Color {
         // Generate color based on username hash
-        let hash = abs(username.hashValue)
+        let hash = abs(displayName.hashValue)
         let colors: [Color] = [
             .blue, .green, .orange, .purple, .pink, .indigo, .teal,
         ]
@@ -105,17 +105,17 @@ public struct InitialsView: View {
 }
 
 private struct HeaderView: View {
-    let username: String
+    let displayName: String
     let timestamp: Date
     let isCurrentUser: Bool
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(username)
+            Text(displayName)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(isCurrentUser ? .blue : .primary)
 
-            if isCurrentUser && username.lowercased() != "you" {
+            if isCurrentUser && displayName.lowercased() != "you" {
                 Text("You")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.blue.opacity(0.7))
@@ -226,7 +226,7 @@ private struct ReplyIndicatorView: View {
                         .clipShape(Capsule())
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(referenced.creatorUsername)
+                        Text(referenced.creatorDisplayName)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.blue)
 
@@ -278,7 +278,7 @@ struct CommentView_Previews: PreviewProvider {
                 comment: Comment(
                     id: "1",
                     creatorId: "user1",
-                    creatorUsername: "mrman454545",
+                    creatorDisplayName: "mrman454545",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-300),
                     text:
@@ -286,7 +286,7 @@ struct CommentView_Previews: PreviewProvider {
                     referenceCommentId: "6062A175-5B2A-47A4-BD23-7CD2D5C011D7"
                 ),
                 isCurrentUser: false,
-                username: "Sarah Chen",
+                displayName: "Sarah Chen",
                 avatar: nil,
                 onReply: {}
             )
@@ -296,7 +296,7 @@ struct CommentView_Previews: PreviewProvider {
                 comment: Comment(
                     id: "2",
                     creatorId: "currentUser",
-                    creatorUsername: "saytwinucheckin",
+                    creatorDisplayName: "saytwinucheckin",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-120),
                     text:
@@ -304,7 +304,7 @@ struct CommentView_Previews: PreviewProvider {
                     referenceCommentId: nil
                 ),
                 isCurrentUser: true,
-                username: "You",
+                displayName: "You",
                 avatar: nil,
                 onReply: {}
             )
@@ -314,7 +314,7 @@ struct CommentView_Previews: PreviewProvider {
                 comment: Comment(
                     id: "3",
                     creatorId: "user3",
-                    creatorUsername: "saytwinucheckin",
+                    creatorDisplayName: "saytwinucheckin",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-60),
                     text:
@@ -322,7 +322,7 @@ struct CommentView_Previews: PreviewProvider {
                     referenceCommentId: "1"
                 ),
                 isCurrentUser: false,
-                username: "Michael Johnson",
+                displayName: "Michael Johnson",
                 avatar: nil,
                 onReply: {}
             )

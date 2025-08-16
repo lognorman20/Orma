@@ -10,7 +10,7 @@ import FirebaseDatabase
 struct Post: Codable {
     let id: String
     let creatorId: String
-    let creatorUsername: String
+    let creatorDisplayName: String
     let createdAt: Date
     // TODO: allow for multiple images to be uploaded
     let imagePath: String  // file path on firebase storage
@@ -21,14 +21,14 @@ struct Post: Codable {
     let comments: [Comment]
 
     enum CodingKeys: String, CodingKey {
-        case id, creatorId, creatorUsername, createdAt, imagePath, reference,
+        case id, creatorId, creatorDisplayName, createdAt, imagePath, reference,
             likedBy, description, comments
     }
 
     init(
         id: String,
         creatorId: String,
-        creatorUsername: String,
+        creatorDisplayName: String,
         createdAt: Date,
         imagePath: String,
         reference: String,
@@ -38,7 +38,7 @@ struct Post: Codable {
     ) {
         self.id = id
         self.creatorId = creatorId
-        self.creatorUsername = creatorUsername
+        self.creatorDisplayName = creatorDisplayName
         self.createdAt = createdAt
         self.imagePath = imagePath
         self.reference = reference
@@ -51,8 +51,8 @@ struct Post: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
         creatorId = try container.decode(String.self, forKey: .creatorId)
-        creatorUsername = try container.decode(
-            String.self, forKey: .creatorUsername)
+        creatorDisplayName = try container.decode(
+            String.self, forKey: .creatorDisplayName)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         imagePath = try container.decode(String.self, forKey: .imagePath)
         reference = try container.decode(String.self, forKey: .reference)
@@ -65,7 +65,7 @@ struct Post: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         try container.encode(creatorId, forKey: .creatorId)
-        try container.encode(creatorUsername, forKey: .creatorUsername)
+        try container.encode(creatorDisplayName, forKey: .creatorDisplayName)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(imagePath, forKey: .imagePath)
         try container.encode(reference, forKey: .reference)

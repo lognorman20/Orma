@@ -15,7 +15,7 @@ struct CommentSectionView: View {
     @State private var showingTextField: Bool = false
     @FocusState private var isTextFieldFocused: Bool
     @State private var currentUserId: String = ""
-    @State private var currentUsername: String = ""
+    @State private var currentDisplayName: String = ""
     @StateObject var commentViewModel: CommentViewModel
 
     init(postId: String, viewModel: CommentViewModel = CommentViewModel()) {
@@ -76,7 +76,7 @@ struct CommentSectionView: View {
                                 comment: comment,
                                 isCurrentUser: comment.creatorId
                                     == currentUserId,
-                                username: getUsernameForComment(comment),
+                                displayName: getDisplayNameForComment(comment),
                                 avatar: getAvatarForComment(comment),
                                 onReply: {
                                     handleReply(to: comment)
@@ -90,7 +90,6 @@ struct CommentSectionView: View {
                         }
                     }
                 }
-//                .padding(.vertical, 8)
             }
 
             // Reply indicator
@@ -111,7 +110,7 @@ struct CommentSectionView: View {
 
                 HStack(spacing: 12) {
                     // User avatar for new comment
-                    InitialsView(username: currentUsername)
+                    InitialsView(displayName: currentDisplayName)
                         .scaleEffect(0.8)
 
                     // Text input
@@ -156,7 +155,7 @@ struct CommentSectionView: View {
         }
         .onAppear {
             currentUserId = getCurrentUserId()
-            currentUsername = getCurrentUsername()
+            currentDisplayName = getCurrentDisplayName()
             loadComments()
         }
         .onChange(of: showingTextField) { _, showing in
@@ -172,13 +171,13 @@ struct CommentSectionView: View {
         return commentViewModel.comments.sorted { $0.createdAt < $1.createdAt }
     }
 
-    private func getUsernameForComment(_ comment: Comment) -> String {
+    private func getDisplayNameForComment(_ comment: Comment) -> String {
         if comment.creatorId == currentUserId {
-            return currentUsername
+            return OrmaUser.shared.displayName
         }
 
         // TODO: shift this to query firebase?
-        return comment.creatorUsername
+        return comment.creatorDisplayName
     }
 
     private func getAvatarForComment(_ comment: Comment) -> String? {
@@ -231,9 +230,9 @@ struct CommentSectionView: View {
         return uid
     }
 
-    public func getCurrentUsername() -> String {
-        let username = OrmaUser.shared.username
-        return username
+    public func getCurrentDisplayName() -> String {
+        let displayName = OrmaUser.shared.displayName
+        return displayName
     }
 }
 
@@ -241,7 +240,7 @@ struct CommentSectionView: View {
 private struct ReplyingToIndicator: View {
     let commentId: String
     let onCancel: () -> Void
-    @State private var replyingToUsername: String = ""
+    @State private var replyingToDisplayName: String = ""
 
     var body: some View {
         HStack {
@@ -255,7 +254,7 @@ private struct ReplyingToIndicator: View {
                     .foregroundColor(.secondary)
 
                 Text(
-                    replyingToUsername.isEmpty ? "comment" : replyingToUsername
+                    replyingToDisplayName.isEmpty ? "comment" : replyingToDisplayName
                 )
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.blue)
@@ -275,7 +274,7 @@ private struct ReplyingToIndicator: View {
         .onAppear {
             getComment(commentId: commentId) { comment in
                 if let c = comment {
-                    replyingToUsername = c.creatorUsername
+                    replyingToDisplayName = c.creatorDisplayName
                 }
             }
         }

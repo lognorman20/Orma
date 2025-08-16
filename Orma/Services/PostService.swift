@@ -95,7 +95,7 @@ class PostService {
                 guard let dict = snap.value as? [String: Any],
                     let id = dict["id"] as? String,
                     let creatorId = dict["creatorId"] as? String,
-                    let creatorUsername = dict["creatorUsername"] as? String,
+                    let creatorDisplayName = dict["creatorDisplayName"] as? String,
                     let postId = dict["postId"] as? String,
                     let createdAtString = dict["createdAt"] as? String,
                     let createdAt = isoFormatter.date(from: createdAtString),
@@ -110,7 +110,7 @@ class PostService {
                 let comment = Comment(
                     id: id,
                     creatorId: creatorId,
-                    creatorUsername: creatorUsername,
+                    creatorDisplayName: creatorDisplayName,
                     postId: postId,
                     createdAt: createdAt,
                     text: text,
@@ -134,13 +134,13 @@ class PostService {
                     guard let dict = snap.value as? [String: Any],
                           let id = dict["id"] as? String,
                           let creatorId = dict["creatorId"] as? String,
-                          let creatorUsername = dict["creatorUsername"] as? String,
+                          let creatorDisplayName = dict["creatorDisplayName"] as? String,
                           let postId = dict["postId"] as? String,
                           let createdAtString = dict["createdAt"] as? String,
                           let createdAt = iso.date(from: createdAtString),
                           let text = dict["text"] as? String else { continue }
                     let referenceCommentId = (dict["referenceCommentId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
-                    continuation.resume(returning: Comment(id: id, creatorId: creatorId, creatorUsername: creatorUsername, postId: postId, createdAt: createdAt, text: text, referenceCommentId: referenceCommentId))
+                    continuation.resume(returning: Comment(id: id, creatorId: creatorId, creatorDisplayName: creatorDisplayName, postId: postId, createdAt: createdAt, text: text, referenceCommentId: referenceCommentId))
                     return
                 }
                 continuation.resume(returning: nil)
@@ -162,7 +162,7 @@ class PostService {
 
                 guard let id = dict["id"] as? String,
                     let creatorId = dict["creatorId"] as? String,
-                    let creatorUsername = dict["creatorUsername"] as? String,
+                    let creatorDisplayName = dict["creatorDisplayName"] as? String,
                     let createdAtString = dict["createdAt"] as? String,
                     let createdAt = isoFormatter.date(from: createdAtString),
                     let imagePath = dict["imagePath"] as? String,
@@ -188,7 +188,7 @@ class PostService {
                 let post = Post(
                     id: id,
                     creatorId: creatorId,
-                    creatorUsername: creatorUsername,
+                    creatorDisplayName: creatorDisplayName,
                     createdAt: createdAt,
                     imagePath: imagePath,
                     reference: reference,
@@ -236,13 +236,13 @@ class PostService {
         text: String,
         referenceCommentId: String? = nil
     ) async throws {
-        guard let currentUser = OrmaUser.shared.firebaseUser else { return }
+        guard let firebaseUser = OrmaUser.shared.firebaseUser else { return }
 
         let commentId = UUID().uuidString
         let commentData: [String: Any] = [
             "id": commentId,
-            "creatorId": currentUser.uid,
-            "creatorUsername": currentUser.displayName ?? "Unknown",
+            "creatorId": firebaseUser.uid,
+            "creatorDisplayName": OrmaUser.shared.displayName,
             "postId": postId,
             "createdAt": ISO8601DateFormatter().string(from: Date()),
             "text": text,
@@ -276,7 +276,7 @@ class PostService {
         let postData: [String: Any] = [
             "id": postId,
             "creatorId": currentUser.uid,
-            "creatorUsername": currentUser.displayName ?? "Unknown",
+            "creatorDisplayName": currentUser.displayName ?? "Unknown",
             "createdAt": ISO8601DateFormatter().string(from: Date()),
             "imagePath": imagePath.absoluteString,
             "reference": reference,

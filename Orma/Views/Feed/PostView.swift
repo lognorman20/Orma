@@ -26,7 +26,7 @@ struct PostView: View {
     ]
 
     private var userGradient: LinearGradient {
-        let index = abs(post.creatorUsername.hashValue) % gradientColors.count
+        let index = abs(post.creatorDisplayName.hashValue) % gradientColors.count
         return LinearGradient(
             colors: gradientColors[index], startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -34,7 +34,7 @@ struct PostView: View {
     }
 
     private var userGradientFirstColor: Color {
-        let index = abs(post.creatorUsername.hashValue) % gradientColors.count
+        let index = abs(post.creatorDisplayName.hashValue) % gradientColors.count
         return gradientColors[index].first ?? .blue
     }
 
@@ -129,7 +129,7 @@ struct PostHeader: View {
                 .fill(gradient)
                 .frame(width: 36, height: 36)
                 .overlay {
-                    Text(String(post.creatorUsername.prefix(1)))
+                    Text(String(post.creatorDisplayName.prefix(1)))
                         .font(
                             .system(size: 14, weight: .bold, design: .rounded)
                         )
@@ -140,7 +140,7 @@ struct PostHeader: View {
                 }
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(post.creatorUsername)
+                Text(post.creatorDisplayName)
                     .font(
                         .system(size: 14, weight: .semibold, design: .rounded)
                     )
@@ -327,7 +327,7 @@ struct PostContentView: View {
     let post1 = Post(
         id: "abc123",
         creatorId: "user789",
-        creatorUsername: "logan_norman",
+        creatorDisplayName: "logan_norman",
         createdAt: Date(),
         imagePath:
             "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
@@ -336,11 +336,11 @@ struct PostContentView: View {
         description: "This is a sample post description for preview purposes.",
         comments: [
             Comment(
-                id: "123", creatorId: "user456", creatorUsername: "cheeser",
+                id: "123", creatorId: "user456", creatorDisplayName: "cheeser",
                 postId: "abc123",
                 createdAt: Date(), text: "Great post!", referenceCommentId: nil),
             Comment(
-                id: "456", creatorId: "user123", creatorUsername: "cheeser",
+                id: "456", creatorId: "user123", creatorDisplayName: "cheeser",
                 postId: "abc123",
                 createdAt: Date(), text: "Very inspiring.",
                 referenceCommentId: "comment001"),
@@ -350,7 +350,7 @@ struct PostContentView: View {
     let post2 = Post(
         id: "def456",
         creatorId: "user123",
-        creatorUsername: "another_user",
+        creatorDisplayName: "another_user",
         createdAt: Date().addingTimeInterval(-86400),
         imagePath:
             "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
@@ -364,7 +364,7 @@ struct PostContentView: View {
     let post3 = Post(
         id: "ghi789",
         creatorId: "user555",
-        creatorUsername: "faith_fan",
+        creatorDisplayName: "faith_fan",
         createdAt: Date().addingTimeInterval(-3600 * 5),
         imagePath:
             "https://firebasestorage.googleapis.com:443/v0/b/orma-b48d0.firebasestorage.app/o/pTGsHIXWfDSnhu681SRusfbT2cu1%2F030373A6-8A02-4153-84CC-55647100BF09.jpg?alt=media&token=aff42a3b-c568-4826-9d2b-1d130e3de2ee",
@@ -373,7 +373,7 @@ struct PostContentView: View {
         description: "Psalm 23 always brings me peace.",
         comments: [
             Comment(
-                id: "789", creatorId: "user789", creatorUsername: "youngbull",
+                id: "789", creatorId: "user789", creatorDisplayName: "youngbull",
                 postId: "ghi789",
                 createdAt: Date(), text: "Amen to that!",
                 referenceCommentId: nil)
