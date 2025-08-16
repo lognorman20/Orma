@@ -267,16 +267,16 @@ class PostService {
     func createPost(image: UIImage, reference: String, description: String)
         async throws
     {
-        guard let currentUser = OrmaUser.shared.firebaseUser else { return }
+        guard let firebaseUser = OrmaUser.shared.firebaseUser else { return }
         // store the image in Cloud Storage
-        let imagePath = try await uploadImage(image, for: currentUser)
+        let imagePath = try await uploadImage(image, for: firebaseUser)
 
         // store the post in Firestore with currentUser info
         let postId = UUID().uuidString
         let postData: [String: Any] = [
             "id": postId,
-            "creatorId": currentUser.uid,
-            "creatorDisplayName": currentUser.displayName ?? "Unknown",
+            "creatorId": firebaseUser.uid,
+            "creatorDisplayName": OrmaUser.shared.displayName,
             "createdAt": ISO8601DateFormatter().string(from: Date()),
             "imagePath": imagePath.absoluteString,
             "reference": reference,

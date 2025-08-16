@@ -25,7 +25,7 @@ class OrmaUser: ObservableObject {
     @Published var friends: [OrmaFriend] = []
 
     let ormaUserId: String = ""
-    var displayName: String = ""
+    @Published var displayName: String = ""
 
     init() {
         if let currentUser = Auth.auth().currentUser {
@@ -40,6 +40,11 @@ class OrmaUser: ObservableObject {
                         if let savedUsername = value["username"] as? String {
                             DispatchQueue.main.async {
                                 self.username = savedUsername
+                            }
+                        }
+                        if let savedDisplayName = value["displayName"] as? String {
+                            DispatchQueue.main.async {
+                                self.displayName = savedDisplayName
                             }
                         }
                         if let friendsArray = value["friends"] as? [[String: Any]] {

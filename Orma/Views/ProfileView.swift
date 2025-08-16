@@ -15,7 +15,7 @@ struct ProfileView: View {
     var body: some View {
         VStack {
             Text("Profile view ya get me")
-            Text(user.firebaseUser!.displayName ?? "username not found")
+            Text(user.displayName)
             Button(action: signOut) {
                 Text("sign out")
             }
