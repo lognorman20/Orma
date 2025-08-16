@@ -226,16 +226,12 @@ struct CommentSectionView: View {
     }
 
     public func getCurrentUserId() -> String {
-        guard let uid = OrmaUser.shared.user?.uid else {
-            fatalError("No current user found")
-        }
+        let uid = OrmaUser.shared.firebaseUser.uid
         return uid
     }
 
     public func getCurrentUsername() -> String {
-        guard let username = OrmaUser.shared.user?.displayName else {
-            fatalError("No current user found")
-        }
+        let username = OrmaUser.shared.username
         return username
     }
 }

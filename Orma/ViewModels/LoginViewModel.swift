@@ -17,14 +17,13 @@ class LoginViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let user):
-                    OrmaUser.shared.user = user
+                    OrmaUser.shared.firebaseUser = user
                     KeychainService.saveUser(user)
                     if let token = user.refreshToken {
                         KeychainService.saveToken(token)
                     }
                 case .failure(let error):
                     print("Login failed: \(error.localizedDescription)")
-                    OrmaUser.shared.user = nil
                 }
             }
         }

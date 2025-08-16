@@ -13,7 +13,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-            if ormaUser.user != nil {
+            if ormaUser.firebaseUser != nil {
                 MainTabView()
             } else {
                 LoginView(loginViewModel: _viewModel)

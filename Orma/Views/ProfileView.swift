@@ -9,10 +9,29 @@ import FirebaseAuth
 import SwiftUI
 
 struct ProfileView: View {
+    @State private var user: OrmaUser = OrmaUser.shared
+    @State private var newFriendName: String = ""
+    
     var body: some View {
-        Text("Profile view ya get me")
-        Button(action: {}) {
-            Text("sign out")
+        VStack {
+            Text("Profile view ya get me")
+            Text(user.firebaseUser.displayName ?? "username not found")
+            Button(action: signOut) {
+                Text("sign out")
+            }
+            TextField("add new friend", text: $newFriendName)
+            Text("Your friends")
+            ScrollView {
+                LazyVStack {
+                    ForEach(user.friends, id: \.id) { friend in
+                        Text(friend.displayName)
+                    }
+                }
+            }
+        }
+        .padding()
+        .onAppear {
+            user = OrmaUser.shared
         }
     }
 
@@ -21,10 +40,6 @@ struct ProfileView: View {
         do {
             try firebaseAuth.signOut()
             KeychainService.clearAll()
-            OrmaUser.shared.user = nil
-            withAnimation(.easeInOut) {
-                OrmaUser.shared.user = nil
-            }
         } catch let signOutError as NSError {
             print("Error signing out: %@", signOutError)
         }

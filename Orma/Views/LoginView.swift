@@ -182,7 +182,6 @@ struct LoginView: View {
 }
 
 #Preview {
-    @Previewable @State var isLoggedIn = false
     @Previewable @EnvironmentObject var viewModel: LoginViewModel
     LoginView(loginViewModel: _viewModel)
 }

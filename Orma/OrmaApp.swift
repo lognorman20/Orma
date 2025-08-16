@@ -47,7 +47,7 @@ struct OrmaApp: App {
                         if let currentUser = Auth.auth().currentUser,
                             currentUser.uid == savedUID
                         {
-                            OrmaUser.shared.user = currentUser
+                            OrmaUser.shared.firebaseUser = currentUser
                         } else {
                             // Optionally, force re-login or fetch user info from your server if needed
                             print("User not logged in or UID mismatch")

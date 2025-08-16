@@ -40,13 +40,17 @@ struct PostView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            PostHeader(post: post, gradient: userGradient, firstColor: userGradientFirstColor, showVerseModal: $showVerseModal)
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+            PostHeader(
+                post: post, gradient: userGradient,
+                firstColor: userGradientFirstColor,
+                showVerseModal: $showVerseModal
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
 
             PostImageView(image: image)
-            
+
             PostContentView(
                 post: post,
                 showFullDescription: $showFullDescription,
@@ -64,10 +68,11 @@ struct PostView: View {
                 CommentSectionView(
                     postId: post.id
                 )
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .top)),
-                    removal: .opacity.combined(with: .move(edge: .top))
-                ))
+                .transition(
+                    .asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity.combined(with: .move(edge: .top))
+                    ))
             }
         }
         .background {
@@ -77,7 +82,10 @@ struct PostView: View {
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(
                             LinearGradient(
-                                colors: [.white.opacity(0.3), .clear, .black.opacity(0.1)],
+                                colors: [
+                                    .white.opacity(0.3), .clear,
+                                    .black.opacity(0.1),
+                                ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -85,15 +93,17 @@ struct PostView: View {
                         )
                 }
         }
-        .shadow(color: userGradientFirstColor.opacity(0.15), radius: 8, x: 0, y: 4)
+        .shadow(
+            color: userGradientFirstColor.opacity(0.15), radius: 8, x: 0, y: 4
+        )
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .onAppear {
             comments = post.comments
-            if let currentUser = OrmaUser.shared.user {
-                PostService().isLiked(postId: post.id, userId: currentUser.uid) { liked in
-                    isLiked = liked
-                }
+            let currentUser = OrmaUser.shared.firebaseUser
+            PostService().isLiked(postId: post.id, userId: currentUser.uid) {
+                liked in
+                isLiked = liked
             }
             PostService().getImage(from: post.imagePath) { image in
                 withAnimation(.easeOut(duration: 0.3)) { self.image = image }
@@ -120,7 +130,9 @@ struct PostHeader: View {
                 .frame(width: 36, height: 36)
                 .overlay {
                     Text(String(post.creatorUsername.prefix(1)))
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .font(
+                            .system(size: 14, weight: .bold, design: .rounded)
+                        )
                         .foregroundColor(.white)
                 }
                 .overlay {
@@ -129,7 +141,9 @@ struct PostHeader: View {
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(post.creatorUsername)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(
+                        .system(size: 14, weight: .semibold, design: .rounded)
+                    )
                     .foregroundColor(.primary)
 
                 Text(timeAgo(from: post.createdAt))
@@ -155,7 +169,9 @@ struct PostHeader: View {
                 .padding(.horizontal, 12)
                 .background(
                     LinearGradient(
-                        colors: [firstColor.opacity(0.2), firstColor.opacity(0.1)],
+                        colors: [
+                            firstColor.opacity(0.2), firstColor.opacity(0.1),
+                        ],
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     )
                 )
@@ -167,11 +183,15 @@ struct PostHeader: View {
 
     private func timeAgo(from date: Date) -> String {
         let secondsAgo = Int(Date().timeIntervalSince(date))
-        if secondsAgo < 60 { return "\(secondsAgo)s" }
-        else if secondsAgo < 3600 { return "\(secondsAgo / 60)m" }
-        else if secondsAgo < 86400 { return "\(secondsAgo / 3600)h" }
-        else if secondsAgo < 604800 { return "\(secondsAgo / 86400)d" }
-        else {
+        if secondsAgo < 60 {
+            return "\(secondsAgo)s"
+        } else if secondsAgo < 3600 {
+            return "\(secondsAgo / 60)m"
+        } else if secondsAgo < 86400 {
+            return "\(secondsAgo / 3600)h"
+        } else if secondsAgo < 604800 {
+            return "\(secondsAgo / 86400)d"
+        } else {
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM d"
             return formatter.string(from: date)
@@ -207,7 +227,6 @@ struct PostImageView: View {
     }
 }
 
-
 struct PostContentView: View {
     let post: Post
     @Binding var showFullDescription: Bool
@@ -238,30 +257,42 @@ struct PostContentView: View {
                 }
                 .buttonStyle(
                     GradientCircleButton(
-                        gradient: LinearGradient(colors: [.red, .pink], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        gradient: LinearGradient(
+                            colors: [.red, .pink], startPoint: .topLeading,
+                            endPoint: .bottomTrailing),
                         isToggle: true,
                         isActive: .constant(true)
                     )
                 )
 
-                Button { showComments.toggle() } label: {
-                    Image(systemName: showComments ? "bubble.right.fill" : "bubble.right.fill")
-                        .font(.system(size: 12, weight: .bold))
+                Button {
+                    showComments.toggle()
+                } label: {
+                    Image(
+                        systemName: showComments
+                            ? "bubble.right.fill" : "bubble.right.fill"
+                    )
+                    .font(.system(size: 12, weight: .bold))
                 }
                 .buttonStyle(
                     GradientCircleButton(
-                        gradient: LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        gradient: LinearGradient(
+                            colors: [.blue, .cyan], startPoint: .topLeading,
+                            endPoint: .bottomTrailing),
                         isActive: .constant(true)
                     )
                 )
 
-                Button {} label: {
+                Button {
+                } label: {
                     Image(systemName: "paperplane.fill")
                         .font(.system(size: 12, weight: .bold))
                 }
                 .buttonStyle(
                     GradientCircleButton(
-                        gradient: LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        gradient: LinearGradient(
+                            colors: [.green, .mint], startPoint: .topLeading,
+                            endPoint: .bottomTrailing),
                         isActive: .constant(true)
                     )
                 )
@@ -269,10 +300,14 @@ struct PostContentView: View {
                 Spacer()
 
                 if !comments.isEmpty {
-                    Button { showComments.toggle() } label: {
-                        Text("\(comments.count) comment\(comments.count == 1 ? "" : "s")")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.secondary)
+                    Button {
+                        showComments.toggle()
+                    } label: {
+                        Text(
+                            "\(comments.count) comment\(comments.count == 1 ? "" : "s")"
+                        )
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
                     }
                 }
             }
@@ -281,14 +316,12 @@ struct PostContentView: View {
 
     private func toggleLike() {
         withAnimation {
-            if let currentUser = OrmaUser.shared.user {
-                PostService().likePost(postId: post.id, userId: currentUser.uid)
-                isLiked.toggle()
-            }
+            let currentUser = OrmaUser.shared.firebaseUser
+            PostService().likePost(postId: post.id, userId: currentUser.uid)
+            isLiked.toggle()
         }
     }
 }
-
 
 #Preview {
     let post1 = Post(
@@ -303,10 +336,12 @@ struct PostContentView: View {
         description: "This is a sample post description for preview purposes.",
         comments: [
             Comment(
-                id: "123", creatorId: "user456", creatorUsername: "cheeser", postId: "abc123",
+                id: "123", creatorId: "user456", creatorUsername: "cheeser",
+                postId: "abc123",
                 createdAt: Date(), text: "Great post!", referenceCommentId: nil),
             Comment(
-                id: "456", creatorId: "user123", creatorUsername: "cheeser",  postId: "abc123",
+                id: "456", creatorId: "user123", creatorUsername: "cheeser",
+                postId: "abc123",
                 createdAt: Date(), text: "Very inspiring.",
                 referenceCommentId: "comment001"),
         ]
@@ -338,8 +373,10 @@ struct PostContentView: View {
         description: "Psalm 23 always brings me peace.",
         comments: [
             Comment(
-                id: "789", creatorId: "user789", creatorUsername: "youngbull", postId: "ghi789",
-                createdAt: Date(), text: "Amen to that!", referenceCommentId: nil)
+                id: "789", creatorId: "user789", creatorUsername: "youngbull",
+                postId: "ghi789",
+                createdAt: Date(), text: "Amen to that!",
+                referenceCommentId: nil)
         ]
     )
 
