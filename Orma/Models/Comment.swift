@@ -13,7 +13,7 @@ struct Comment: Codable {
     let postId: String
     let createdAt: Date
     let text: String
-    let referenceComment: String?
+    let referenceComment: String? // another comment id
 
     enum CodingKeys: String, CodingKey {
         case id, creatorId, postId, createdAt, text, referenceComment
