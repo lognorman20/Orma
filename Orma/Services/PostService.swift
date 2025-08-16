@@ -52,10 +52,13 @@ class PostService {
             }
         }
     }
-    
-    func isLiked(postId: String, userId: String, completion: @escaping (Bool) -> Void) {
+
+    func isLiked(
+        postId: String, userId: String, completion: @escaping (Bool) -> Void
+    ) {
         let postsRef = dbRef.child("posts")
-        let query = postsRef.queryOrdered(byChild: "id").queryEqual(toValue: postId)
+        let query = postsRef.queryOrdered(byChild: "id").queryEqual(
+            toValue: postId)
 
         query.observeSingleEvent(of: .value) { snapshot in
             guard snapshot.exists() else {
@@ -66,7 +69,7 @@ class PostService {
 
             for child in snapshot.children {
                 guard let childSnapshot = child as? DataSnapshot,
-                      let postData = childSnapshot.value as? [String: Any]
+                    let postData = childSnapshot.value as? [String: Any]
                 else { continue }
 
                 let likedBy = postData["likedBy"] as? [String] ?? []
@@ -75,6 +78,50 @@ class PostService {
             }
 
             completion(false)
+        }
+    }
+
+    func getComments(postId: String, completion: @escaping ([Comment]) -> Void)
+    {
+        let commentsRef = dbRef.child("comments")
+            .queryOrdered(byChild: "postId")
+            .queryEqual(toValue: postId)
+
+        commentsRef.observeSingleEvent(of: .value) { snapshot in
+            var comments: [Comment] = []
+            let isoFormatter = ISO8601DateFormatter()
+
+            for case let snap as DataSnapshot in snapshot.children {
+                guard let dict = snap.value as? [String: Any],
+                    let id = dict["id"] as? String,
+                    let creatorId = dict["creatorId"] as? String,
+                    let creatorUsername = dict["creatorUsername"] as? String,
+                    let postId = dict["postId"] as? String,
+                    let createdAtString = dict["createdAt"] as? String,
+                    let createdAt = isoFormatter.date(from: createdAtString),
+                    let text = dict["text"] as? String
+                else {
+                    print("Skipping: invalid data in snapshot \(snap.key)")
+                    continue
+                }
+
+                let referenceCommentId = dict["referenceCommentId"] as? String
+
+                let comment = Comment(
+                    id: id,
+                    creatorId: creatorId,
+                    creatorUsername: creatorUsername,
+                    postId: postId,
+                    createdAt: createdAt,
+                    text: text,
+                    referenceCommentId: referenceCommentId
+                )
+
+                comments.append(comment)
+            }
+
+            print("Got \(comments.count) comments for postId: \(postId)")
+            completion(comments)
         }
     }
 
@@ -159,6 +206,44 @@ class PostService {
                 completion(image)
             }
         }.resume()
+    }
+
+    func createComment(
+        postId: String,
+        text: String,
+        referenceCommentId: String? = nil
+    ) async throws {
+        guard let currentUser = OrmaUser.shared.user else {
+            throw NSError(
+                domain: "CreateComment", code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "No user logged in"]
+            )
+        }
+
+        let commentId = UUID().uuidString
+        let commentData: [String: Any] = [
+            "id": commentId,
+            "creatorId": currentUser.uid,
+            "creatorUsername": currentUser.displayName ?? "Unknown",
+            "postId": postId,
+            "createdAt": ISO8601DateFormatter().string(from: Date()),
+            "text": text,
+            "referenceCommentId": referenceCommentId ?? "",
+        ]
+
+        try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<Void, Error>) in
+            dbRef.child("comments").childByAutoId().setValue(commentData) {
+                error, _ in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+
+        print("Successfully created comment for post \(postId)")
     }
 
     func createPost(image: UIImage, reference: String, description: String)

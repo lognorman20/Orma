@@ -303,12 +303,12 @@ struct PostContentView: View {
         description: "This is a sample post description for preview purposes.",
         comments: [
             Comment(
-                id: "123", creatorId: "user456", postId: "abc123",
-                createdAt: Date(), text: "Great post!", referenceComment: nil),
+                id: "123", creatorId: "user456", creatorUsername: "cheeser", postId: "abc123",
+                createdAt: Date(), text: "Great post!", referenceCommentId: nil),
             Comment(
-                id: "456", creatorId: "user123", postId: "abc123",
+                id: "456", creatorId: "user123", creatorUsername: "cheeser",  postId: "abc123",
                 createdAt: Date(), text: "Very inspiring.",
-                referenceComment: "comment001"),
+                referenceCommentId: "comment001"),
         ]
     )
 
@@ -338,8 +338,8 @@ struct PostContentView: View {
         description: "Psalm 23 always brings me peace.",
         comments: [
             Comment(
-                id: "789", creatorId: "user789", postId: "ghi789",
-                createdAt: Date(), text: "Amen to that!", referenceComment: nil)
+                id: "789", creatorId: "user789", creatorUsername: "youngbull", postId: "ghi789",
+                createdAt: Date(), text: "Amen to that!", referenceCommentId: nil)
         ]
     )
 

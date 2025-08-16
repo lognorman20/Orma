@@ -47,18 +47,20 @@ private let previewVM: FeedViewModel = {
                 Comment(
                     id: "c1",
                     creatorId: "user123",
+                    creatorUsername: "mrman454545",
                     postId: "abc123",
                     createdAt: Date().addingTimeInterval(-1800),
                     text: "Great post!",
-                    referenceComment: nil
+                    referenceCommentId: nil
                 ),
                 Comment(
                     id: "c2",
                     creatorId: "user456",
+                    creatorUsername: "mrman454545",
                     postId: "abc123",
                     createdAt: Date().addingTimeInterval(-1200),
                     text: "Very inspiring.",
-                    referenceComment: "c1"
+                    referenceCommentId: "c1"
                 )
             ]
         ),
@@ -75,10 +77,11 @@ private let previewVM: FeedViewModel = {
                 Comment(
                     id: "c3",
                     creatorId: "user789",
+                    creatorUsername: "mrman454545",
                     postId: "def456",
                     createdAt: Date().addingTimeInterval(-7000),
                     text: "Love these verses!",
-                    referenceComment: nil
+                    referenceCommentId: nil
                 )
             ]
         ),
@@ -106,10 +109,11 @@ private let previewVM: FeedViewModel = {
                 Comment(
                     id: "c4",
                     creatorId: "user999",
+                    creatorUsername: "mrman454545",
                     postId: "jkl012",
                     createdAt: Date().addingTimeInterval(-14000),
                     text: "Amazing!",
-                    referenceComment: nil
+                    referenceCommentId: nil
                 )
             ]
         )

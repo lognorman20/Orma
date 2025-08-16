@@ -10,7 +10,7 @@ struct CommentView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Reference comment (reply indicator)
-            if let referenceId = comment.referenceComment {
+            if let referenceId = comment.referenceCommentId {
                 ReplyIndicatorView(referenceId: referenceId)
             }
             
@@ -262,10 +262,11 @@ struct CommentView_Previews: PreviewProvider {
                 comment: Comment(
                     id: "1",
                     creatorId: "user1",
+                    creatorUsername: "mrman454545",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-300),
                     text: "This is a really insightful verse! Thanks for sharing this reflection.",
-                    referenceComment: nil
+                    referenceCommentId: nil
                 ),
                 isCurrentUser: false,
                 username: "Sarah Chen",
@@ -278,10 +279,11 @@ struct CommentView_Previews: PreviewProvider {
                 comment: Comment(
                     id: "2",
                     creatorId: "currentUser",
+                    creatorUsername: "saytwinucheckin",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-120),
                     text: "Absolutely! This passage has been on my heart lately too.",
-                    referenceComment: nil
+                    referenceCommentId: nil
                 ),
                 isCurrentUser: true,
                 username: "You",
@@ -294,10 +296,11 @@ struct CommentView_Previews: PreviewProvider {
                 comment: Comment(
                     id: "3",
                     creatorId: "user3",
+                    creatorUsername: "saytwinucheckin",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-60),
                     text: "Same here! It's amazing how God speaks through His word.",
-                    referenceComment: "1"
+                    referenceCommentId: "1"
                 ),
                 isCurrentUser: false,
                 username: "Michael Johnson",
