@@ -15,9 +15,9 @@ struct CommentView: View {
             }
 
             // Main comment content
-            HStack(alignment: .top, spacing: 10) {
+            HStack(alignment: .top, spacing: 8) {
                 // Message content
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     // Username and timestamp
                     HeaderView(
                         username: username, timestamp: comment.createdAt,
@@ -43,8 +43,6 @@ struct CommentView: View {
                         )
                     }
                 }
-
-                Spacer(minLength: 30)  // Ensure some right margin
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 6)
@@ -126,8 +124,6 @@ private struct HeaderView: View {
                     .background(Color.blue.opacity(0.1))
                     .clipShape(Capsule())
             }
-
-            Spacer()
 
             Text(relativeTimeString(from: timestamp))
                 .font(.system(size: 11, weight: .regular))

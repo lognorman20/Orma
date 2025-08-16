@@ -71,16 +71,23 @@ struct CommentSectionView: View {
                 // Comments list - dynamic height based on content
                 LazyVStack(spacing: 8) {
                     ForEach(sortedComments(), id: \.id) { comment in
-                        CommentView(
-                            comment: comment,
-                            isCurrentUser: comment.creatorId == currentUserId,
-                            username: getUsernameForComment(comment),
-                            avatar: getAvatarForComment(comment),
-                            onReply: {
-                                handleReply(to: comment)
-                            }
-                        )
-                        .id(comment.id)
+                        VStack(spacing: 0) {
+                            CommentView(
+                                comment: comment,
+                                isCurrentUser: comment.creatorId
+                                    == currentUserId,
+                                username: getUsernameForComment(comment),
+                                avatar: getAvatarForComment(comment),
+                                onReply: {
+                                    handleReply(to: comment)
+                                }
+                            )
+                            .id(comment.id)
+                            .padding(.vertical, 8)
+
+                            Divider()
+                                .background(Color.secondary.opacity(0.15))  // hardly noticeable
+                        }
                     }
                 }
                 .padding(.vertical, 8)
@@ -238,27 +245,27 @@ private struct ReplyingToIndicator: View {
     let commentId: String
     let onCancel: () -> Void
     @State private var replyingToUsername: String = ""
-    
+
     var body: some View {
         HStack {
             HStack(spacing: 8) {
                 Image(systemName: "arrowshape.turn.up.left")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.blue)
-                
+
                 Text("Replying to")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.secondary)
-                
+
                 Text(
                     replyingToUsername.isEmpty ? "comment" : replyingToUsername
                 )
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
+
             Button(action: onCancel) {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .medium))
@@ -276,10 +283,12 @@ private struct ReplyingToIndicator: View {
             }
         }
     }
-    
-    func getComment(commentId: String, completion: @escaping (Comment?) -> Void) {
+
+    func getComment(commentId: String, completion: @escaping (Comment?) -> Void)
+    {
         Task {
-            let c = try? await PostService().getCommentById(commentId: commentId)
+            let c = try? await PostService().getCommentById(
+                commentId: commentId)
             await MainActor.run { completion(c) }
         }
     }
