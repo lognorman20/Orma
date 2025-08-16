@@ -1,10 +1,3 @@
-//
-//  CommentView.swift
-//  Orma
-//
-//  Created by Logan Norman on 8/15/25.
-//
-
 import SwiftUI
 
 struct CommentView: View {
@@ -13,9 +6,6 @@ struct CommentView: View {
     let username: String
     let avatar: String? // URL or system name
     let onReply: () -> Void
-    let onLike: () -> Void
-    @State private var isLiked: Bool = false
-    @State private var likeCount: Int = 0
     
     var body: some View {
         VStack(spacing: 0) {
@@ -25,35 +15,37 @@ struct CommentView: View {
             }
             
             // Main comment content
-            HStack(alignment: .top, spacing: 12) {
-                // Avatar
-                AvatarView(avatar: avatar, username: username)
-                
+            HStack(alignment: .top, spacing: 10) {
                 // Message content
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     // Username and timestamp
                     HeaderView(username: username, timestamp: comment.createdAt, isCurrentUser: isCurrentUser)
                     
-                    // Message bubble
-                    MessageBubbleView(
-                        text: comment.text,
-                        isCurrentUser: isCurrentUser
-                    )
+                    // Message bubble with avatar
+                    HStack(alignment: .center, spacing: 8) {
+                        AvatarView(avatar: avatar, username: username)
+                        
+                        MessageBubbleView(
+                            text: comment.text,
+                            isCurrentUser: isCurrentUser
+                        )
+                    }
                     
-                    // Actions (like, reply, time)
-                    ActionsView(
-                        isLiked: $isLiked,
-                        likeCount: $likeCount,
-                        timestamp: comment.createdAt,
-                        onReply: onReply,
-                        onLike: onLike
-                    )
+                    // Actions
+                    HStack {
+                        Spacer()
+                            .frame(width: 36) // Avatar width + spacing
+                        
+                        ActionsView(
+                            onReply: onReply
+                        )
+                    }
                 }
                 
-                Spacer(minLength: 40) // Ensure some right margin
+                Spacer(minLength: 30) // Ensure some right margin
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
         }
     }
 }
@@ -71,7 +63,7 @@ private struct AvatarView: View {
             } placeholder: {
                 InitialsView(username: username)
             }
-            .frame(width: 32, height: 32)
+            .frame(width: 28, height: 28)
             .clipShape(Circle())
         } else {
             InitialsView(username: username)
@@ -99,10 +91,10 @@ private struct InitialsView: View {
     var body: some View {
         Circle()
             .fill(backgroundColor.gradient)
-            .frame(width: 32, height: 32)
+            .frame(width: 28, height: 28)
             .overlay(
                 Text(initials)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.white)
             )
     }
@@ -116,15 +108,15 @@ private struct HeaderView: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(username)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(isCurrentUser ? .blue : .primary)
             
-            if isCurrentUser {
+            if isCurrentUser && username.lowercased() != "you" {
                 Text("You")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.blue.opacity(0.7))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
                     .background(Color.blue.opacity(0.1))
                     .clipShape(Capsule())
             }
@@ -132,7 +124,7 @@ private struct HeaderView: View {
             Spacer()
             
             Text(relativeTimeString(from: timestamp))
-                .font(.system(size: 12, weight: .regular))
+                .font(.system(size: 11, weight: .regular))
                 .foregroundColor(.secondary)
         }
     }
@@ -162,93 +154,56 @@ private struct MessageBubbleView: View {
     
     var body: some View {
         HStack {
-            if isCurrentUser { Spacer() }
-            
             Text(text)
-                .font(.system(size: 15, weight: .regular))
+                .font(.system(size: 14, weight: .regular))
                 .foregroundColor(isCurrentUser ? .white : .primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
                 .background(
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(
-                            isCurrentUser
-                                ? LinearGradient(
-                                    gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                    ZStack {
+                        if isCurrentUser {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                                : LinearGradient(
-                                    gradient: Gradient(colors: [Color(.systemGray6), Color(.systemGray6)]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                        )
-                        .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+                        } else {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemGray6))
+                        }
+                    }
+                    .shadow(color: .black.opacity(0.04), radius: 1, x: 0, y: 0.5)
                 )
             
-            if !isCurrentUser { Spacer() }
+            Spacer()
         }
-        .padding(.horizontal)
     }
 }
 
-
 private struct ActionsView: View {
-    @Binding var isLiked: Bool
-    @Binding var likeCount: Int
-    let timestamp: Date
     let onReply: () -> Void
-    let onLike: () -> Void
     
     var body: some View {
-        HStack(spacing: 16) {
-            // Like button
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isLiked.toggle()
-                    likeCount += isLiked ? 1 : -1
-                }
-                onLike()
-            }) {
-                HStack(spacing: 4) {
-                    Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(isLiked ? .red : .secondary)
-                        .scaleEffect(isLiked ? 1.2 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: isLiked)
-                    
-                    if likeCount > 0 {
-                        Text("\(likeCount)")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-            
+        HStack(spacing: 14) {
             // Reply button
             Button(action: onReply) {
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: "arrowshape.turn.up.left")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
                     
                     Text("Reply")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
                 }
             }
             .buttonStyle(PlainButtonStyle())
             
             Spacer()
-            
-            // Precise timestamp on tap
-            Text(DateFormatter.timeFormatter.string(from: timestamp))
-                .font(.system(size: 11, weight: .regular))
-                .foregroundColor(.blue)
         }
-        .padding(.leading, 4)
     }
 }
 
@@ -279,12 +234,12 @@ private struct ReplyIndicatorView: View {
                 
                 Spacer()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
             .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .padding(.horizontal, 16)
-            .padding(.bottom, 4)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .padding(.horizontal, 14)
+            .padding(.bottom, 3)
         }
     }
 }
@@ -315,8 +270,7 @@ struct CommentView_Previews: PreviewProvider {
                 isCurrentUser: false,
                 username: "Sarah Chen",
                 avatar: nil,
-                onReply: {},
-                onLike: {}
+                onReply: {}
             )
             
             // Current user comment
@@ -332,8 +286,7 @@ struct CommentView_Previews: PreviewProvider {
                 isCurrentUser: true,
                 username: "You",
                 avatar: nil,
-                onReply: {},
-                onLike: {}
+                onReply: {}
             )
             
             // Reply comment
@@ -349,8 +302,7 @@ struct CommentView_Previews: PreviewProvider {
                 isCurrentUser: false,
                 username: "Michael Johnson",
                 avatar: nil,
-                onReply: {},
-                onLike: {}
+                onReply: {}
             )
             
             Spacer()
