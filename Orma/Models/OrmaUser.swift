@@ -27,7 +27,7 @@ class OrmaUser: ObservableObject {
     let ormaUserId: String = ""
     var displayName: String = ""
 
-    private init() {
+    init() {
         if let currentUser = Auth.auth().currentUser {
             self.firebaseUser = currentUser
             self.displayName = currentUser.displayName ?? "User"

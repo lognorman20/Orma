@@ -90,7 +90,7 @@ struct CommentSectionView: View {
                         }
                     }
                 }
-                .padding(.vertical, 8)
+//                .padding(.vertical, 8)
             }
 
             // Reply indicator
