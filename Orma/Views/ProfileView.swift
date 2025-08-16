@@ -15,7 +15,7 @@ struct ProfileView: View {
     var body: some View {
         VStack {
             Text("Profile view ya get me")
-            Text(user.firebaseUser.displayName ?? "username not found")
+            Text(user.firebaseUser!.displayName ?? "username not found")
             Button(action: signOut) {
                 Text("sign out")
             }
@@ -40,6 +40,7 @@ struct ProfileView: View {
         do {
             try firebaseAuth.signOut()
             KeychainService.clearAll()
+            OrmaUser.shared.firebaseUser = nil
         } catch let signOutError as NSError {
             print("Error signing out: %@", signOutError)
         }

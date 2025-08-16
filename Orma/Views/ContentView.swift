@@ -10,10 +10,10 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var viewModel: LoginViewModel
     @ObservedObject var ormaUser = OrmaUser.shared
-    
+
     var body: some View {
         NavigationView {
-            if ormaUser.firebaseUser != nil {
+            if ormaUser.isLoggedIn {
                 MainTabView()
             } else {
                 LoginView(loginViewModel: _viewModel)

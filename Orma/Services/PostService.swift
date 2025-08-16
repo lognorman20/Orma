@@ -236,7 +236,7 @@ class PostService {
         text: String,
         referenceCommentId: String? = nil
     ) async throws {
-        let currentUser = OrmaUser.shared.firebaseUser
+        guard let currentUser = OrmaUser.shared.firebaseUser else { return }
 
         let commentId = UUID().uuidString
         let commentData: [String: Any] = [
@@ -267,7 +267,7 @@ class PostService {
     func createPost(image: UIImage, reference: String, description: String)
         async throws
     {
-        let currentUser = OrmaUser.shared.firebaseUser
+        guard let currentUser = OrmaUser.shared.firebaseUser else { return }
         // store the image in Cloud Storage
         let imagePath = try await uploadImage(image, for: currentUser)
 

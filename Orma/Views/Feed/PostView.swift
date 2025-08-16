@@ -100,7 +100,7 @@ struct PostView: View {
         .padding(.vertical, 6)
         .onAppear {
             comments = post.comments
-            let currentUser = OrmaUser.shared.firebaseUser
+            guard let currentUser = OrmaUser.shared.firebaseUser else { return }
             PostService().isLiked(postId: post.id, userId: currentUser.uid) {
                 liked in
                 isLiked = liked
@@ -316,7 +316,7 @@ struct PostContentView: View {
 
     private func toggleLike() {
         withAnimation {
-            let currentUser = OrmaUser.shared.firebaseUser
+            guard let currentUser = OrmaUser.shared.firebaseUser else { return }
             PostService().likePost(postId: post.id, userId: currentUser.uid)
             isLiked.toggle()
         }

@@ -226,7 +226,8 @@ struct CommentSectionView: View {
     }
 
     public func getCurrentUserId() -> String {
-        let uid = OrmaUser.shared.firebaseUser.uid
+        guard let currentUser = OrmaUser.shared.firebaseUser else { return "" }
+        let uid = currentUser.uid
         return uid
     }
 
