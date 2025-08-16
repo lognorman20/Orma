@@ -4,45 +4,47 @@ struct CommentView: View {
     let comment: Comment
     let isCurrentUser: Bool
     let username: String
-    let avatar: String? // URL or system name
+    let avatar: String?  // URL or system name
     let onReply: () -> Void
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Reference comment (reply indicator)
             if let referenceId = comment.referenceCommentId {
                 ReplyIndicatorView(referenceId: referenceId)
             }
-            
+
             // Main comment content
             HStack(alignment: .top, spacing: 10) {
                 // Message content
                 VStack(alignment: .leading, spacing: 4) {
                     // Username and timestamp
-                    HeaderView(username: username, timestamp: comment.createdAt, isCurrentUser: isCurrentUser)
-                    
+                    HeaderView(
+                        username: username, timestamp: comment.createdAt,
+                        isCurrentUser: isCurrentUser)
+
                     // Message bubble with avatar
                     HStack(alignment: .center, spacing: 8) {
                         AvatarView(avatar: avatar, username: username)
-                        
+
                         MessageBubbleView(
                             text: comment.text,
                             isCurrentUser: isCurrentUser
                         )
                     }
-                    
+
                     // Actions
                     HStack {
                         Spacer()
-                            .frame(width: 36) // Avatar width + spacing
-                        
+                            .frame(width: 36)  // Avatar width + spacing
+
                         ActionsView(
                             onReply: onReply
                         )
                     }
                 }
-                
-                Spacer(minLength: 30) // Ensure some right margin
+
+                Spacer(minLength: 30)  // Ensure some right margin
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 6)
@@ -53,7 +55,7 @@ struct CommentView: View {
 private struct AvatarView: View {
     let avatar: String?
     let username: String
-    
+
     var body: some View {
         if let avatar = avatar, avatar.starts(with: "http") {
             AsyncImage(url: URL(string: avatar)) { image in
@@ -73,21 +75,25 @@ private struct AvatarView: View {
 
 public struct InitialsView: View {
     let username: String
-    
+
     public var initials: String {
         let components = username.components(separatedBy: " ")
         let firstInitial = components.first?.first?.uppercased() ?? ""
-        let lastInitial = components.count > 1 ? (components.last?.first?.uppercased() ?? "") : ""
+        let lastInitial =
+            components.count > 1
+            ? (components.last?.first?.uppercased() ?? "") : ""
         return firstInitial + lastInitial
     }
-    
+
     public var backgroundColor: Color {
         // Generate color based on username hash
         let hash = abs(username.hashValue)
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .indigo, .teal]
+        let colors: [Color] = [
+            .blue, .green, .orange, .purple, .pink, .indigo, .teal,
+        ]
         return colors[hash % colors.count]
     }
-    
+
     public var body: some View {
         Circle()
             .fill(backgroundColor.gradient)
@@ -104,13 +110,13 @@ private struct HeaderView: View {
     let username: String
     let timestamp: Date
     let isCurrentUser: Bool
-    
+
     var body: some View {
         HStack(spacing: 8) {
             Text(username)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(isCurrentUser ? .blue : .primary)
-            
+
             if isCurrentUser && username.lowercased() != "you" {
                 Text("You")
                     .font(.system(size: 11, weight: .medium))
@@ -120,19 +126,19 @@ private struct HeaderView: View {
                     .background(Color.blue.opacity(0.1))
                     .clipShape(Capsule())
             }
-            
+
             Spacer()
-            
+
             Text(relativeTimeString(from: timestamp))
                 .font(.system(size: 11, weight: .regular))
                 .foregroundColor(.secondary)
         }
     }
-    
+
     private func relativeTimeString(from date: Date) -> String {
         let now = Date()
         let difference = now.timeIntervalSince(date)
-        
+
         if difference < 60 {
             return "now"
         } else if difference < 3600 {
@@ -151,7 +157,7 @@ private struct HeaderView: View {
 private struct MessageBubbleView: View {
     let text: String
     let isCurrentUser: Bool
-    
+
     var body: some View {
         HStack {
             Text(text)
@@ -165,7 +171,9 @@ private struct MessageBubbleView: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(
                                     LinearGradient(
-                                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                                        gradient: Gradient(colors: [
+                                            Color.blue, Color.blue.opacity(0.8),
+                                        ]),
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
@@ -175,9 +183,10 @@ private struct MessageBubbleView: View {
                                 .fill(Color(.systemGray6))
                         }
                     }
-                    .shadow(color: .black.opacity(0.04), radius: 1, x: 0, y: 0.5)
+                    .shadow(
+                        color: .black.opacity(0.04), radius: 1, x: 0, y: 0.5)
                 )
-            
+
             Spacer()
         }
     }
@@ -185,7 +194,7 @@ private struct MessageBubbleView: View {
 
 private struct ActionsView: View {
     let onReply: () -> Void
-    
+
     var body: some View {
         HStack(spacing: 14) {
             // Reply button
@@ -194,14 +203,14 @@ private struct ActionsView: View {
                     Image(systemName: "arrowshape.turn.up.left")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
-                    
+
                     Text("Reply")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
                 }
             }
             .buttonStyle(PlainButtonStyle())
-            
+
             Spacer()
         }
     }
@@ -210,36 +219,47 @@ private struct ActionsView: View {
 private struct ReplyIndicatorView: View {
     let referenceId: String
     @State private var referencedComment: Comment?
-    @State private var referencedUsername: String = ""
-    
+
     var body: some View {
-        if let referenced = referencedComment {
-            HStack(spacing: 8) {
-                Rectangle()
-                    .fill(Color.blue)
-                    .frame(width: 3, height: 24)
-                    .clipShape(Capsule())
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(referencedUsername)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.blue)
-                    
-                    Text(referenced.text)
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+        VStack {
+            if let referenced = referencedComment {
+                HStack(spacing: 8) {
+                    Rectangle()
+                        .fill(Color.blue)
+                        .frame(width: 3, height: 24)
+                        .clipShape(Capsule())
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(referenced.creatorUsername)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.blue)
+
+                        Text(referenced.text)
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+
+                    Spacer()
                 }
-                
-                Spacer()
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+                .background(Color(.systemGray6))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .padding(.horizontal, 14)
+                .padding(.bottom, 3)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 6)
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .padding(.horizontal, 14)
-            .padding(.bottom, 3)
+        }.onAppear {
+            fetchReferencedComment(referenceId: referenceId)
+        }
+    }
+
+    func fetchReferencedComment(referenceId: String) {
+        Task {
+            if let c = try? await PostService().getCommentById(commentId: referenceId) {
+                await MainActor.run { referencedComment = c }
+            }
         }
     }
 }
@@ -265,15 +285,16 @@ struct CommentView_Previews: PreviewProvider {
                     creatorUsername: "mrman454545",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-300),
-                    text: "This is a really insightful verse! Thanks for sharing this reflection.",
-                    referenceCommentId: nil
+                    text:
+                        "This is a really insightful verse! Thanks for sharing this reflection.",
+                    referenceCommentId: "6062A175-5B2A-47A4-BD23-7CD2D5C011D7"
                 ),
                 isCurrentUser: false,
                 username: "Sarah Chen",
                 avatar: nil,
                 onReply: {}
             )
-            
+
             // Current user comment
             CommentView(
                 comment: Comment(
@@ -282,7 +303,8 @@ struct CommentView_Previews: PreviewProvider {
                     creatorUsername: "saytwinucheckin",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-120),
-                    text: "Absolutely! This passage has been on my heart lately too.",
+                    text:
+                        "Absolutely! This passage has been on my heart lately too.",
                     referenceCommentId: nil
                 ),
                 isCurrentUser: true,
@@ -290,7 +312,7 @@ struct CommentView_Previews: PreviewProvider {
                 avatar: nil,
                 onReply: {}
             )
-            
+
             // Reply comment
             CommentView(
                 comment: Comment(
@@ -299,7 +321,8 @@ struct CommentView_Previews: PreviewProvider {
                     creatorUsername: "saytwinucheckin",
                     postId: "post1",
                     createdAt: Date().addingTimeInterval(-60),
-                    text: "Same here! It's amazing how God speaks through His word.",
+                    text:
+                        "Same here! It's amazing how God speaks through His word.",
                     referenceCommentId: "1"
                 ),
                 isCurrentUser: false,
@@ -307,7 +330,7 @@ struct CommentView_Previews: PreviewProvider {
                 avatar: nil,
                 onReply: {}
             )
-            
+
             Spacer()
         }
         .background(Color(.systemBackground))

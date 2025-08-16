@@ -200,19 +200,17 @@ struct CommentSectionView: View {
                     text: trimmedText,
                     referenceCommentId: referenceId
                 )
-                if let replyId = referenceId {
-                    print("Replying to: \(replyId)")
+                await MainActor.run {
+                    loadComments()
+                    newCommentText = ""
+                    replyingTo = nil
+                    showingTextField = false
+                    isTextFieldFocused = false
                 }
             } catch {
                 print("Failed to create comment:", error)
             }
         }
-
-        // Reset form
-        newCommentText = ""
-        replyingTo = nil
-        showingTextField = false
-        isTextFieldFocused = false
     }
 
     private func loadComments() {
@@ -240,27 +238,27 @@ private struct ReplyingToIndicator: View {
     let commentId: String
     let onCancel: () -> Void
     @State private var replyingToUsername: String = ""
-
+    
     var body: some View {
         HStack {
             HStack(spacing: 8) {
                 Image(systemName: "arrowshape.turn.up.left")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.blue)
-
+                
                 Text("Replying to")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.secondary)
-
+                
                 Text(
                     replyingToUsername.isEmpty ? "comment" : replyingToUsername
                 )
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.blue)
             }
-
+            
             Spacer()
-
+            
             Button(action: onCancel) {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .medium))
@@ -271,8 +269,18 @@ private struct ReplyingToIndicator: View {
         .padding(.vertical, 8)
         .background(Color(.systemGray6))
         .onAppear {
-            // TODO: Load username for the comment being replied to
-            replyingToUsername = "Sarah"
+            getComment(commentId: commentId) { comment in
+                if let c = comment {
+                    replyingToUsername = c.creatorUsername
+                }
+            }
+        }
+    }
+    
+    func getComment(commentId: String, completion: @escaping (Comment?) -> Void) {
+        Task {
+            let c = try? await PostService().getCommentById(commentId: commentId)
+            await MainActor.run { completion(c) }
         }
     }
 }

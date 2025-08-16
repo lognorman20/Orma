@@ -125,6 +125,29 @@ class PostService {
         }
     }
 
+    func getCommentById(commentId: String) async throws -> Comment? {
+        try await withCheckedThrowingContinuation { continuation in
+            let query = dbRef.child("comments").queryOrdered(byChild: "id").queryEqual(toValue: commentId)
+            query.observeSingleEvent(of: .value) { snapshot in
+                let iso = ISO8601DateFormatter()
+                for case let snap as DataSnapshot in snapshot.children {
+                    guard let dict = snap.value as? [String: Any],
+                          let id = dict["id"] as? String,
+                          let creatorId = dict["creatorId"] as? String,
+                          let creatorUsername = dict["creatorUsername"] as? String,
+                          let postId = dict["postId"] as? String,
+                          let createdAtString = dict["createdAt"] as? String,
+                          let createdAt = iso.date(from: createdAtString),
+                          let text = dict["text"] as? String else { continue }
+                    let referenceCommentId = (dict["referenceCommentId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+                    continuation.resume(returning: Comment(id: id, creatorId: creatorId, creatorUsername: creatorUsername, postId: postId, createdAt: createdAt, text: text, referenceCommentId: referenceCommentId))
+                    return
+                }
+                continuation.resume(returning: nil)
+            }
+        }
+    }
+    
     func getPosts(completion: @escaping ([Post]) -> Void) {
         let postsRef = dbRef.child("posts")
         postsRef.observeSingleEvent(of: .value) { snapshot in
