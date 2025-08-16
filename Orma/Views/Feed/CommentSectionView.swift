@@ -45,27 +45,24 @@ struct CommentSectionView: View {
             
             Divider()
             
-            // Comments list
+            // Comments content
             if isLoading {
-                // Loading state
+                // Loading state - fixed height
                 VStack {
-                    Spacer()
                     ProgressView()
                         .scaleEffect(1.2)
                     Text("Loading comments...")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.secondary)
                         .padding(.top, 8)
-                    Spacer()
                 }
-                .frame(minHeight: 200)
+                .frame(height: 100)
+                .frame(maxWidth: .infinity)
             } else if comments.isEmpty {
-                // Empty state
-                VStack(spacing: 16) {
-                    Spacer()
-                    
+                // Empty state - compact height
+                VStack(spacing: 12) {
                     Image(systemName: "bubble.left.and.bubble.right")
-                        .font(.system(size: 48))
+                        .font(.system(size: 32))
                         .foregroundColor(.secondary.opacity(0.6))
                     
                     VStack(spacing: 4) {
@@ -77,33 +74,26 @@ struct CommentSectionView: View {
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(.secondary)
                     }
-                    
-                    Spacer()
                 }
-                .frame(minHeight: 200)
+                .frame(height: 120)
+                .frame(maxWidth: .infinity)
             } else {
-                // Comments list
-                ScrollView {
-                    LazyVStack(spacing: 8) {
-                        ForEach(sortedComments(), id: \.id) { comment in
-                            CommentView(
-                                comment: comment,
-                                isCurrentUser: comment.creatorId == currentUserId,
-                                username: getUsernameForComment(comment),
-                                avatar: getAvatarForComment(comment),
-                                onReply: {
-                                    handleReply(to: comment)
-                                }
-                            )
-                            .id(comment.id)
-                        }
-                        
-                        // Bottom padding for better scrolling
-                        Color.clear
-                            .frame(height: 80)
+                // Comments list - dynamic height based on content
+                LazyVStack(spacing: 8) {
+                    ForEach(sortedComments(), id: \.id) { comment in
+                        CommentView(
+                            comment: comment,
+                            isCurrentUser: comment.creatorId == currentUserId,
+                            username: getUsernameForComment(comment),
+                            avatar: getAvatarForComment(comment),
+                            onReply: {
+                                handleReply(to: comment)
+                            }
+                        )
+                        .id(comment.id)
                     }
-                    .padding(.top, 8)
                 }
+                .padding(.vertical, 8)
             }
             
             // Reply indicator
@@ -152,11 +142,17 @@ struct CommentSectionView: View {
                 .padding(.vertical, 12)
                 .background(Color(.systemBackground))
             }
+            .clipShape(UnevenRoundedRectangle(
+                topLeadingRadius: 0,
+                bottomLeadingRadius: 16,
+                bottomTrailingRadius: 16,
+                topTrailingRadius: 0
+            ))
         }
         .onAppear {
             loadComments()
         }
-        .onChange(of: showingTextField) { showing in
+        .onChange(of: showingTextField) { _, showing in
             if showing {
                 isTextFieldFocused = true
             }
@@ -267,7 +263,6 @@ struct CommentSectionView: View {
 }
 
 // MARK: - Supporting Views
-
 private struct ReplyingToIndicator: View {
     let commentId: String
     let onCancel: () -> Void
