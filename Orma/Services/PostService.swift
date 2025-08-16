@@ -13,6 +13,71 @@ class PostService {
     var dbRef: DatabaseReference! = Database.database().reference()
     var storageRef = Storage.storage().reference()
 
+    func likePost(postId: String, userId: String) {
+        let postsRef = dbRef.child("posts")
+        let query = postsRef.queryOrdered(byChild: "id").queryEqual(
+            toValue: postId)
+
+        query.observeSingleEvent(of: .value) { snapshot in
+            guard snapshot.exists() else {
+                print("Post not found: \(postId)")
+                return
+            }
+
+            for child in snapshot.children {
+                guard let childSnapshot = child as? DataSnapshot,
+                    let postData = childSnapshot.value as? [String: Any]
+                else {
+                    continue
+                }
+
+                var likedBy = postData["likedBy"] as? [String] ?? []
+
+                if likedBy.contains(userId) {
+                    likedBy.removeAll { $0 == userId }
+                } else {
+                    likedBy.append(userId)
+                }
+
+                postsRef.child(childSnapshot.key).child("likedBy").setValue(
+                    likedBy
+                ) { error, _ in
+                    if let error = error {
+                        print("Failed to update likes:", error)
+                    } else {
+                        print("Successfully updated likes for post \(postId)")
+                    }
+                }
+                break  // Only process the first match
+            }
+        }
+    }
+    
+    func isLiked(postId: String, userId: String, completion: @escaping (Bool) -> Void) {
+        let postsRef = dbRef.child("posts")
+        let query = postsRef.queryOrdered(byChild: "id").queryEqual(toValue: postId)
+
+        query.observeSingleEvent(of: .value) { snapshot in
+            guard snapshot.exists() else {
+                print("Post not found: \(postId)")
+                completion(false)
+                return
+            }
+
+            for child in snapshot.children {
+                guard let childSnapshot = child as? DataSnapshot,
+                      let postData = childSnapshot.value as? [String: Any]
+                else { continue }
+
+                let likedBy = postData["likedBy"] as? [String] ?? []
+                completion(likedBy.contains(userId))
+                return
+            }
+
+            completion(false)
+        }
+    }
+
     func getPosts(completion: @escaping ([Post]) -> Void) {
         let postsRef = dbRef.child("posts")
         postsRef.observeSingleEvent(of: .value) { snapshot in

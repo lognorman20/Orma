@@ -170,7 +170,12 @@ struct PostView: View {
                     Button(action: {
                         withAnimation {
                             // ref do something
-                            isLiked.toggle()
+                            if let currentUser = OrmaUser.shared.user {
+                                PostService().likePost(postId: post.id, userId: currentUser.uid)
+                                isLiked.toggle()
+                            } else {
+                                print("failed to like post")
+                            }
                         }
                     }) {
                         Image(systemName: isLiked ? "heart.fill" : "heart")
@@ -235,7 +240,12 @@ struct PostView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .onAppear {
-            likeCount = post.likedBy.count
+            if let currentUser = OrmaUser.shared.user {
+                PostService().isLiked(postId: post.id, userId: currentUser.uid) { liked in
+                    isLiked = liked
+                }
+            }
+            
             PostService().getImage(from: post.imagePath) { image in
                 withAnimation(.easeOut(duration: 0.3)) {
                     self.image = image
