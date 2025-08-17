@@ -64,12 +64,22 @@ struct FeedView: View {
                 scrollOffset = value
             }
             .refreshable {
-                await feedViewModel.refreshPostsAsync()
+                switch selectedFilter {
+                case .everyone:
+                    await feedViewModel.refreshPostsAsync(fetchingFriendsPosts: false)
+                case .friends:
+                    await feedViewModel.refreshPostsAsync(fetchingFriendsPosts: true)
+                }
             }
         }
         .background(Color(.systemGroupedBackground))
         .onAppear {
-            feedViewModel.refreshPosts()
+            switch selectedFilter {
+            case .everyone:
+                feedViewModel.fetchAllPosts()
+            case .friends:
+                feedViewModel.fetchFriendsPosts()
+            }
         }
     }
     
@@ -219,8 +229,6 @@ struct FeedView: View {
     }
     
     private func applyFilter(_ filter: FeedFilter) {
-        // Add any additional filter logic here
-        // For example, you might want to refresh data based on the filter
 //        switch filter {
 //        case .everyone:
 //            feedViewModel.loadAllPosts()

@@ -5,26 +5,41 @@
 //  Created by Logan Norman on 8/9/25.
 //
 
-import Foundation
+import FirebaseAuth
 import SwiftUI
 
 class FeedViewModel: ObservableObject {
     @Published var posts: [Post] = []
 
-    func refreshPosts() {
-        PostService().getPosts(completion: { [weak self] fetchedPosts in
+    func fetchAllPosts() {
+        PostService().getPosts(completion: { fetchedPosts in
             DispatchQueue.main.async {
                 print(
                     "after refreshing the # of posts is \(fetchedPosts.count)"
                 )
-                self?.posts = fetchedPosts.reversed()
+                self.posts = fetchedPosts.reversed()
             }
         })
     }
     
-    @MainActor
-    func refreshPostsAsync() async {
-        await Task { refreshPosts() }.value
+    func fetchFriendsPosts() {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        OrmaUserService().fetchAllFriends(userId: currentUserId) { fetchedFriends in
+            PostService().getFriendsPost(friends: fetchedFriends) { friendsPosts in
+                DispatchQueue.main.async {
+                    print("found \(friendsPosts.count) from frens")
+                    self.posts = friendsPosts.reversed()
+                }
+            }
+        }
     }
-
+    
+    @MainActor
+    func refreshPostsAsync(fetchingFriendsPosts: Bool) async {
+        if fetchingFriendsPosts {
+            await Task { fetchFriendsPosts() }.value
+        } else {
+            await Task { fetchAllPosts() }.value
+        }
+    }
 }

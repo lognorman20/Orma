@@ -148,6 +148,59 @@ class PostService {
         }
     }
     
+    func getFriendsPost(friends: [OrmaFriend], completion: @escaping ([Post]) -> Void) {
+        let friendIds = Set(friends.map { $0.id }) // assuming OrmaFriend has `id`
+        let postsRef = dbRef.child("posts")
+        postsRef.observeSingleEvent(of: .value) { snapshot in
+            var posts: [Post] = []
+            let isoFormatter = ISO8601DateFormatter()
+
+            for case let snap as DataSnapshot in snapshot.children {
+                guard let dict = snap.value as? [String: Any],
+                      let id = dict["id"] as? String,
+                      let creatorId = dict["creatorId"] as? String,
+                      let creatorDisplayName = dict["creatorDisplayName"] as? String,
+                      let createdAtString = dict["createdAt"] as? String,
+                      let createdAt = isoFormatter.date(from: createdAtString),
+                      let imagePath = dict["imagePath"] as? String,
+                      let reference = dict["reference"] as? String,
+                      let description = dict["description"] as? String
+                else {
+                    continue
+                }
+
+                // filter by friend IDs
+                guard friendIds.contains(creatorId) else { continue }
+
+                let likedBy = dict["likedBy"] as? [String] ?? []
+                let commentsData = dict["comments"] as? [[String: Any]] ?? []
+                let comments: [Comment] = commentsData.compactMap { commentDict in
+                    try? JSONDecoder().decode(
+                        Comment.self,
+                        from: JSONSerialization.data(withJSONObject: commentDict)
+                    )
+                }
+
+                let post = Post(
+                    id: id,
+                    creatorId: creatorId,
+                    creatorDisplayName: creatorDisplayName,
+                    createdAt: createdAt,
+                    imagePath: imagePath,
+                    reference: reference,
+                    likedBy: likedBy,
+                    description: description,
+                    comments: comments
+                )
+
+                posts.append(post)
+            }
+
+            print("Got \(posts.count) posts from friends")
+            completion(posts)
+        }
+    }
+    
     func getPosts(completion: @escaping ([Post]) -> Void) {
         let postsRef = dbRef.child("posts")
         postsRef.observeSingleEvent(of: .value) { snapshot in
