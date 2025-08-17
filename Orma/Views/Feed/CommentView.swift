@@ -249,16 +249,17 @@ private struct ReplyIndicatorView: View {
                 .padding(.bottom, 3)
             }
         }.onAppear {
-            fetchReferencedComment(referenceId: referenceId)
-            fetchReferenceCreatorDisplayName(referenceId: referenceId)
+            fetchReferencedComment(commentId: referenceId)
+            if let referencedComment = referencedComment {
+                fetchReferenceCreatorDisplayName(referenceId: referencedComment.creatorId)
+            }
         }
     }
 
-    // TODO: rename parameter to reflect creator id
-    func fetchReferencedComment(referenceId: String) {
+    func fetchReferencedComment(commentId: String) {
         Task {
             if let c = try? await PostService().getCommentById(
-                commentId: referenceId)
+                commentId: commentId)
             {
                 await MainActor.run { referencedComment = c }
             }

@@ -15,7 +15,6 @@ struct PostView: View {
     @State private var isLiked = false
     @State private var likeCount: Int = 0
     @State private var showFullDescription = false
-    @State private var comments: [Comment] = []
     @State private var newCommentText = ""
     @State private var isSubmittingComment = false
 
@@ -55,9 +54,9 @@ struct PostView: View {
 
             PostContentView(
                 post: post,
+                comments: post.comments,
                 showFullDescription: $showFullDescription,
                 showComments: $showComments,
-                comments: $comments,
                 newCommentText: $newCommentText,
                 isSubmittingComment: $isSubmittingComment,
                 isLiked: $isLiked,
@@ -101,7 +100,6 @@ struct PostView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .onAppear {
-            comments = post.comments
             guard let currentUser = OrmaUser.shared.firebaseUser else { return }
             PostService().isLiked(postId: post.id, userId: currentUser.uid) {
                 liked in
@@ -248,9 +246,9 @@ struct PostImageView: View {
 
 struct PostContentView: View {
     let post: Post
+    let comments: [Comment]
     @Binding var showFullDescription: Bool
     @Binding var showComments: Bool
-    @Binding var comments: [Comment]
     @Binding var newCommentText: String
     @Binding var isSubmittingComment: Bool
     @Binding var isLiked: Bool
