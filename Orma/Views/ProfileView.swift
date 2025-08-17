@@ -28,7 +28,7 @@ struct ProfileView: View {
         NavigationView {
             ScrollView {
                 VStack {
-                    ProfileHeaderView(user: user, onSignOut: signOut)
+                    ProfileHeaderView(user: user, onSignOut: signOut, onUpdateDisplayName: updateDisplayName)
 
                     AddFriendSectionView(
                         newFriendUsername: $newFriendUsername,
@@ -207,27 +207,184 @@ struct ProfileView: View {
             print("Error signing out: %@", signOutError)
         }
     }
+    
+    private func updateDisplayName(_ newDisplayName: String) {
+        OrmaUserService().updateDisplayName(newDisplayName: newDisplayName)
+        user.displayName = newDisplayName
+    }
 }
 
 // MARK: - ProfileHeaderView
 struct ProfileHeaderView: View {
     let user: OrmaUser
     let onSignOut: () -> Void
-
+    let onUpdateDisplayName: (String) -> Void
+    
+    @State private var isEditing = false
+    @State private var newDisplayName = ""
+    @FocusState private var isTextFieldFocused: Bool
+    
     var body: some View {
         VStack(spacing: 16) {
             ProfileAvatarView(displayName: user.displayName)
 
             VStack(spacing: 4) {
-                Text(user.displayName)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                if isEditing {
+                    // Custom styled text field that matches your app's design
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "person.text.rectangle")
+                                .foregroundColor(.blue)
+                                .font(.body)
+                            
+                            Text("Update Display Name")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                        }
+                        
+                        TextField("Enter your display name", text: $newDisplayName)
+                            .focused($isTextFieldFocused)
+                            .font(.body)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemGray6))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(isTextFieldFocused ? .blue : .clear, lineWidth: 2)
+                                    )
+                            )
+                            .onSubmit {
+                                saveDisplayName()
+                            }
+                        
+                        HStack(spacing: 12) {
+                            // Save button
+                            Button(action: saveDisplayName) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption)
+                                    Text("Save")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(newDisplayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color.blue)
+                                )
+                            }
+                            .disabled(newDisplayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            
+                            // Cancel button
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isEditing = false
+                                    isTextFieldFocused = false
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "xmark")
+                                        .font(.caption)
+                                    Text("Cancel")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.red)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(.red.opacity(0.1))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(.red.opacity(0.2), lineWidth: 1)
+                                        )
+                                )
+                            }
+                            
+                            Spacer()
+                        }
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.regularMaterial)
+                            .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 1)
+                    )
+                    .transition(.opacity)
+                } else {
+                    HStack(spacing: 8) {
+                        Text(user.displayName)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        Button(action: {
+                            newDisplayName = user.displayName
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isEditing = true
+                            }
+                            // Focus the text field after animation
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isTextFieldFocused = true
+                            }
+                        }) {
+                            Image(systemName: "pencil")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                                .padding(6)
+                                .background(
+                                    Circle()
+                                        .fill(.blue.opacity(0.1))
+                                )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .scaleEffect(isEditing ? 0.8 : 1.0)
+                        .opacity(isEditing ? 0.6 : 1.0)
+                    }
+                    .transition(.opacity)
+                }
 
-                SignOutButtonView(onSignOut: onSignOut)
+                if !isEditing {
+                    Text("@\(user.username)")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .transition(.opacity)
+
+                    SignOutButtonView(onSignOut: onSignOut)
+                        .transition(.opacity)
+                }
             }
         }
         .padding(.top, 20)
+        .animation(.easeInOut(duration: 0.3), value: isEditing)
+    }
+    
+    private func saveDisplayName() {
+        let trimmedName = newDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty, trimmedName != user.displayName else {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isEditing = false
+                isTextFieldFocused = false
+            }
+            return
+        }
+        
+        // Call your update function here
+        onUpdateDisplayName(trimmedName)
+        
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isEditing = false
+            isTextFieldFocused = false
+        }
     }
 }
 
@@ -365,8 +522,18 @@ struct AddFriendTextFieldView: View {
 
     var body: some View {
         TextField("Enter friend's username", text: $newFriendUsername)
-            .textFieldStyle(.roundedBorder)
             .focused(isUsernameFocused)
+            .font(.body)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemGray6))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(isUsernameFocused.wrappedValue ? .blue : .clear, lineWidth: 2)
+                    )
+            )
             .onChange(of: newFriendUsername) { _, newValue in
                 onFetchMatches(newValue)
             }

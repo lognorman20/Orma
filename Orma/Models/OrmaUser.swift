@@ -111,7 +111,24 @@ class OrmaUserService {
             }
         }
     }
-
+    
+    func updateDisplayName(newDisplayName: String) {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        // Update Auth profile
+        let changeRequest = user.createProfileChangeRequest()
+        changeRequest.displayName = newDisplayName
+        changeRequest.commitChanges { error in
+            if let error = error {
+                print("Error updating display name in Auth: \(error.localizedDescription)")
+                return
+            }
+            
+            let requestRef = self.dbRef.child("users").child(user.uid).child("displayName")
+            requestRef.setValue(newDisplayName)
+        }
+    }
+    
     // { friendRequests/fromId/toId/timestamp }
     func sendFriendRequest(friendId: String) {
         guard let currentUser = Auth.auth().currentUser else { return }
