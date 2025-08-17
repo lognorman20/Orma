@@ -22,9 +22,11 @@ class LoginViewModel: ObservableObject {
 
                     if let displayName = user.displayName, !displayName.isEmpty {
                         ormaUser.displayName = displayName
-                        ormaUser.username = displayName
+                        let baseUsername = displayName
                             .components(separatedBy: CharacterSet.alphanumerics.inverted)
                             .joined()
+                        let randomNumber = Int.random(in: 100...999) // three-digit random number
+                        ormaUser.username = "\(baseUsername)\(randomNumber)"
                     }
 
                     // refresh from Firebase to get display name + friends
