@@ -7,6 +7,7 @@
 
 import FirebaseAuth
 import FirebaseDatabase
+import FirebaseStorage
 import SwiftUI
 
 struct OrmaFriend: Identifiable, Codable {
@@ -16,7 +17,8 @@ struct OrmaFriend: Identifiable, Codable {
 }
 
 class OrmaUser: ObservableObject {
-    private static var dbRef: DatabaseReference = Database.database().reference()
+    private static var dbRef: DatabaseReference = Database.database()
+        .reference()
     static let shared = OrmaUser()
 
     @Published var firebaseUser: User? = nil
@@ -30,12 +32,17 @@ class OrmaUser: ObservableObject {
         if let currentUser = Auth.auth().currentUser {
             self.firebaseUser = currentUser
             self.displayName = currentUser.displayName ?? "User"
-            self.username = currentUser.displayName?
+            self.username =
+                currentUser.displayName?
                 .components(separatedBy: CharacterSet.alphanumerics.inverted)
                 .joined() ?? "User"
 
             refreshUserData()
         }
+    }
+
+    func addFriend() {
+
     }
 
     func refreshUserData() {
@@ -44,22 +51,29 @@ class OrmaUser: ObservableObject {
 
         userRef.observeSingleEvent(of: .value) { snapshot in
             if snapshot.exists(),
-               let value = snapshot.value as? [String: Any] {
+                let value = snapshot.value as? [String: Any]
+            {
 
                 if let savedUsername = value["username"] as? String {
                     DispatchQueue.main.async { self.username = savedUsername }
                 }
 
                 if let savedDisplayName = value["displayName"] as? String {
-                    DispatchQueue.main.async { self.displayName = savedDisplayName }
+                    DispatchQueue.main.async {
+                        self.displayName = savedDisplayName
+                    }
                 }
 
                 if let friendsArray = value["friends"] as? [[String: Any]] {
-                    let loadedFriends = friendsArray.compactMap { dict -> OrmaFriend? in
+                    let loadedFriends = friendsArray.compactMap {
+                        dict -> OrmaFriend? in
                         guard let id = dict["id"] as? String,
-                              let displayName = dict["displayName"] as? String,
-                              let username = dict["username"] as? String else { return nil }
-                        return OrmaFriend(id: id, displayName: displayName, username: username)
+                            let displayName = dict["displayName"] as? String,
+                            let username = dict["username"] as? String
+                        else { return nil }
+                        return OrmaFriend(
+                            id: id, displayName: displayName, username: username
+                        )
                     }
                     DispatchQueue.main.async { self.friends = loadedFriends }
                 }
@@ -68,7 +82,7 @@ class OrmaUser: ObservableObject {
                 let userData: [String: Any] = [
                     "displayName": self.displayName,
                     "username": self.username,
-                    "friends": []
+                    "friends": [],
                 ]
                 userRef.setValue(userData)
             }
@@ -78,3 +92,117 @@ class OrmaUser: ObservableObject {
     var isLoggedIn: Bool { firebaseUser != nil }
 }
 
+class OrmaUserService {
+    var dbRef: DatabaseReference! = Database.database().reference()
+    var storageRef = Storage.storage().reference()
+    
+    func getUserIdIfExists(username: String, completion: @escaping (String?) -> Void) {
+        let usersRef = dbRef.child("users")
+            .queryOrdered(byChild: "username")
+            .queryEqual(toValue: username)
+        
+        usersRef.observeSingleEvent(of: .value) { snapshot in
+            if let child = snapshot.children.allObjects.first as? DataSnapshot {
+                completion(child.key)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+    
+    // { friendRequests/fromId/toId/timestamp }
+    func sendFriendRequest(friendId: String) {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let requestRef = dbRef.child("friendRequests").child(currentUser.uid).child(friendId)
+
+        requestRef.setValue(ServerValue.timestamp())
+    }
+    
+    func addFriend(friendId: String) {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let currentUserId = currentUser.uid
+
+        let usersRef = dbRef.child("users")
+
+        // Fetch both user profiles
+        usersRef.child(currentUserId).observeSingleEvent(of: .value) {
+            currentSnap in
+            usersRef.child(friendId).observeSingleEvent(of: .value) {
+                friendSnap in
+                guard
+                    let currentData = currentSnap.value as? [String: Any],
+                    let friendData = friendSnap.value as? [String: Any],
+                    let currentDisplayName = currentData["displayName"]
+                        as? String,
+                    let currentUsername = currentData["username"] as? String,
+                    let friendDisplayName = friendData["displayName"]
+                        as? String,
+                    let friendUsername = friendData["username"] as? String
+                else { return }
+
+                let currentFriend = [
+                    "id": friendId,
+                    "displayName": friendDisplayName,
+                    "username": friendUsername,
+                ]
+
+                let newFriend = [
+                    "id": currentUserId,
+                    "displayName": currentDisplayName,
+                    "username": currentUsername,
+                ]
+
+                // Add friend to current user
+                usersRef.child(currentUserId).child("friends")
+                    .observeSingleEvent(of: .value) { snap in
+                        var friends = snap.value as? [[String: Any]] ?? []
+                        if !friends.contains(where: {
+                            ($0["id"] as? String) == friendId
+                        }) {
+                            friends.append(currentFriend)
+                            usersRef.child(currentUserId).child("friends")
+                                .setValue(friends)
+                        }
+                    }
+
+                // Add current user to friend
+                usersRef.child(friendId).child("friends").observeSingleEvent(
+                    of: .value
+                ) { snap in
+                    var friends = snap.value as? [[String: Any]] ?? []
+                    if !friends.contains(where: {
+                        ($0["id"] as? String) == currentUserId
+                    }) {
+                        friends.append(newFriend)
+                        usersRef.child(friendId).child("friends").setValue(
+                            friends)
+                    }
+                }
+            }
+        }
+    }
+
+    func removeFriend(friendId: String) {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let currentUserId = currentUser.uid
+
+        let usersRef = dbRef.child("users")
+
+        // Remove friend from current user
+        usersRef.child(currentUserId).child("friends").observeSingleEvent(
+            of: .value
+        ) { snap in
+            var friends = snap.value as? [[String: Any]] ?? []
+            friends.removeAll { ($0["id"] as? String) == friendId }
+            usersRef.child(currentUserId).child("friends").setValue(friends)
+        }
+
+        // Remove current user from friend
+        usersRef.child(friendId).child("friends").observeSingleEvent(of: .value)
+        { snap in
+            var friends = snap.value as? [[String: Any]] ?? []
+            friends.removeAll { ($0["id"] as? String) == currentUserId }
+            usersRef.child(friendId).child("friends").setValue(friends)
+        }
+    }
+}

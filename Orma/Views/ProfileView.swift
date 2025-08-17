@@ -6,12 +6,15 @@
 //
 
 import FirebaseAuth
+import FirebaseDatabase
 import SwiftUI
 
 struct ProfileView: View {
     @State private var user: OrmaUser = OrmaUser.shared
-    @State private var newFriendName: String = ""
-    
+    @State private var newFriendUsername: String = ""
+    @State private var usernameMatches: [String] = []
+    @FocusState private var isUsernameFocused: Bool
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -84,27 +87,63 @@ struct ProfileView: View {
                             Spacer()
                         }
                         
-                        HStack(spacing: 12) {
-                            TextField("Enter friend's name", text: $newFriendName)
+                        VStack(alignment: .leading, spacing: 0) {
+                            TextField("Enter friend's username", text: $newFriendUsername)
                                 .textFieldStyle(.roundedBorder)
+                                .focused($isUsernameFocused)
+                                .onChange(of: newFriendUsername) { _, newValue in
+                                    fetchUsernameMatches(for: newValue)
+                                }
                                 .onSubmit {
-                                    addFriend()
+                                    isUsernameFocused = false
+                                    sendFriendRequest()
                                 }
                             
-                            Button(action: addFriend) {
-                                Text("Add")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(newFriendName.isEmpty ? Color.gray : Color.blue)
-                                    )
+                            if isUsernameFocused && !newFriendUsername.isEmpty && !usernameMatches.isEmpty {
+                                VStack(spacing: 0) {
+                                    ForEach(usernameMatches.prefix(5), id: \.self) { match in
+                                        HStack {
+                                            Text(match)
+                                                .font(.body)
+                                                .foregroundColor(.primary)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 12)
+                                        .background(Color(.systemBackground))
+                                        .onTapGesture {
+                                            newFriendUsername = match
+                                            isUsernameFocused = false
+                                        }
+                                        
+                                        if match != usernameMatches.prefix(5).last {
+                                            Divider().padding(.leading, 16)
+                                        }
+                                    }
+                                }
+                                .background(Color(.systemBackground))
+                                .cornerRadius(12)
+                                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                                .padding(.top, 4)
                             }
-                            .disabled(newFriendName.isEmpty)
                         }
+                        
+                        Button(action: sendFriendRequest) {
+                            Text("Add")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(newFriendUsername.isEmpty ? Color.gray : Color.blue)
+                                )
+                        }
+                        .disabled(newFriendUsername.isEmpty)
                     }
                     .padding(20)
                     .background(
@@ -185,11 +224,6 @@ struct ProfileView: View {
                                     }
                                     .padding(.vertical, 8)
                                     .padding(.horizontal, 4)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(.clear)
-                                    )
-                                    .contentShape(Rectangle())
                                 }
                             }
                         }
@@ -227,12 +261,42 @@ struct ProfileView: View {
         return initials.joined()
     }
     
-    private func addFriend() {
-        guard !newFriendName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        
-        // Add the friend to user.friends array
-        // This would typically involve calling a service or updating the model
-        newFriendName = ""
+    func sendFriendRequest() {
+        let trimmedUsername = newFriendUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedUsername.isEmpty else { return }
+
+        OrmaUserService().getUserIdIfExists(username: trimmedUsername) { friendId in
+            if let friendId = friendId {
+                OrmaUserService().sendFriendRequest(friendId: friendId)
+            } else {
+                print("Username does not exist in Firebase.")
+            }
+        }
+
+        newFriendUsername = ""
+    }
+    
+    // TODO: extract the logic from this to a service
+    private func fetchUsernameMatches(for query: String) {
+        guard !query.isEmpty else {
+            usernameMatches = []
+            return
+        }
+        let ref = Database.database().reference().child("users")
+        ref.queryOrdered(byChild: "username")
+            .queryStarting(atValue: query)
+            .queryEnding(atValue: query + "\u{f8ff}")
+            .observeSingleEvent(of: .value) { snapshot in
+                var results: [String] = []
+                for child in snapshot.children {
+                    if let snap = child as? DataSnapshot,
+                       let dict = snap.value as? [String: Any],
+                       let username = dict["username"] as? String {
+                        results.append(username)
+                    }
+                }
+                self.usernameMatches = results
+            }
     }
 
     func signOut() {
