@@ -230,7 +230,23 @@ class PostService {
             }
         }.resume()
     }
+    
+    func getDisplayName(creatorId: String, completion: @escaping (String?) -> Void) {
+        let userRef = dbRef.child("users").child(creatorId)
 
+        userRef.observeSingleEvent(of: .value) { snapshot in
+            guard snapshot.exists(),
+                  let dict = snapshot.value as? [String: Any],
+                  let displayName = dict["displayName"] as? String else {
+                print("User not found for id \(creatorId)")
+                completion(nil)
+                return
+            }
+
+            completion(displayName)
+        }
+    }
+    
     func createComment(
         postId: String,
         text: String,

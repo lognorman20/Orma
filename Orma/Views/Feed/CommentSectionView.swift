@@ -176,7 +176,13 @@ struct CommentSectionView: View {
             return OrmaUser.shared.displayName
         }
 
-        // TODO: shift this to query firebase?
+        PostService().getDisplayName(creatorId: comment.creatorId) {
+            name in
+            DispatchQueue.main.async {
+                self.currentDisplayName = name ?? "Unknown user"
+            }
+        }
+
         return comment.creatorDisplayName
     }
 

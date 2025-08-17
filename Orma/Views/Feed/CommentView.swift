@@ -21,7 +21,7 @@ struct CommentView: View {
                     // Username and timestamp
                     HeaderView(
                         displayName: displayName, timestamp: comment.createdAt,
-                        isCurrentUser: isCurrentUser)
+                        isCurrentUser: isCurrentUser, creatorId: comment.creatorId)
 
                     // Message bubble with avatar
                     HStack(alignment: .center, spacing: 8) {
@@ -105,9 +105,10 @@ public struct InitialsView: View {
 }
 
 private struct HeaderView: View {
-    let displayName: String
+    @State public var displayName: String
     let timestamp: Date
     let isCurrentUser: Bool
+    let creatorId: String
 
     var body: some View {
         HStack(spacing: 8) {
@@ -253,7 +254,9 @@ private struct ReplyIndicatorView: View {
 
     func fetchReferencedComment(referenceId: String) {
         Task {
-            if let c = try? await PostService().getCommentById(commentId: referenceId) {
+            if let c = try? await PostService().getCommentById(
+                commentId: referenceId)
+            {
                 await MainActor.run { referencedComment = c }
             }
         }

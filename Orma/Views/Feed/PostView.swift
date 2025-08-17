@@ -26,7 +26,8 @@ struct PostView: View {
     ]
 
     private var userGradient: LinearGradient {
-        let index = abs(post.creatorDisplayName.hashValue) % gradientColors.count
+        let index =
+            abs(post.creatorDisplayName.hashValue) % gradientColors.count
         return LinearGradient(
             colors: gradientColors[index], startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -34,7 +35,8 @@ struct PostView: View {
     }
 
     private var userGradientFirstColor: Color {
-        let index = abs(post.creatorDisplayName.hashValue) % gradientColors.count
+        let index =
+            abs(post.creatorDisplayName.hashValue) % gradientColors.count
         return gradientColors[index].first ?? .blue
     }
 
@@ -122,6 +124,7 @@ struct PostHeader: View {
     let gradient: LinearGradient
     let firstColor: Color
     @Binding var showVerseModal: Bool
+    @State private var displayName: String = ""
 
     var body: some View {
         HStack(spacing: 10) {
@@ -129,9 +132,10 @@ struct PostHeader: View {
                 .fill(gradient)
                 .frame(width: 36, height: 36)
                 .overlay {
-                    Text(String(post.creatorDisplayName.prefix(1)))
+                    Text(String(displayName.prefix(1)))
                         .font(
-                            .system(size: 14, weight: .bold, design: .rounded)
+                            .system(
+                                size: 14, weight: .bold, design: .rounded)
                         )
                         .foregroundColor(.white)
                 }
@@ -140,11 +144,14 @@ struct PostHeader: View {
                 }
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(post.creatorDisplayName)
-                    .font(
-                        .system(size: 14, weight: .semibold, design: .rounded)
-                    )
-                    .foregroundColor(.primary)
+                HStack {
+                    Text(displayName)
+                        .font(
+                            .system(
+                                size: 14, weight: .semibold, design: .rounded)
+                        )
+                        .foregroundColor(.primary)
+                }
 
                 Text(timeAgo(from: post.createdAt))
                     .font(.system(size: 11, weight: .medium))
@@ -178,6 +185,18 @@ struct PostHeader: View {
                 .cornerRadius(12)
             }
             .contentShape(Rectangle())
+        }
+        .onAppear {
+            loadCreatorName(for: post.creatorId)
+        }
+    }
+
+    func loadCreatorName(for creatorId: String) {
+        PostService().getDisplayName(creatorId: creatorId) {
+            name in
+            DispatchQueue.main.async {
+                self.displayName = name ?? "Unknown user"
+            }
         }
     }
 
@@ -373,7 +392,8 @@ struct PostContentView: View {
         description: "Psalm 23 always brings me peace.",
         comments: [
             Comment(
-                id: "789", creatorId: "user789", creatorDisplayName: "youngbull",
+                id: "789", creatorId: "user789",
+                creatorDisplayName: "youngbull",
                 postId: "ghi789",
                 createdAt: Date(), text: "Amen to that!",
                 referenceCommentId: nil)
