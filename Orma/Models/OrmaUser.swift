@@ -159,7 +159,77 @@ class OrmaUserService {
             completion(requests)
         }
     }
+    
+    func declineFriendRequest(friendId: String) {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let currentUserId = currentUser.uid
+        
+        let requestRef = dbRef.child("friendRequests").child(friendId).child(currentUserId)
+        requestRef.removeValue()
+    }
+    
+    func fetchAllFriends(userId: String, completion: @escaping ([OrmaFriend]) -> Void) {
+        let ref = Database.database().reference()
+        
+        ref.child("users").child(userId).child("friends").observeSingleEvent(of: .value) { snapshot in
+            guard snapshot.exists() else {
+                completion([])
+                print("No friends found for user")
+                return
+            }
 
+            var friends: [OrmaFriend] = []
+            
+            // Handle both array and dictionary structures
+            if let friendsArray = snapshot.value as? [[String: Any]] {
+                // If friends is stored as an array
+                for friendData in friendsArray {
+                    if let friendId = friendData["id"] as? String,
+                       let displayName = friendData["displayName"] as? String,
+                       let username = friendData["username"] as? String {
+                        
+                        let friend = OrmaFriend(
+                            id: friendId,
+                            displayName: displayName,
+                            username: username
+                        )
+                        friends.append(friend)
+                    }
+                }
+            } else if let friendDict = snapshot.value as? [String: Any] {
+                // If friends is stored as a dictionary with numeric keys
+                for (_, value) in friendDict {
+                    if let friendData = value as? [String: Any],
+                       let friendId = friendData["id"] as? String,
+                       let displayName = friendData["displayName"] as? String,
+                       let username = friendData["username"] as? String {
+                        
+                        let friend = OrmaFriend(
+                            id: friendId,
+                            displayName: displayName,
+                            username: username
+                        )
+                        friends.append(friend)
+                    }
+                }
+            } else {
+                // Handle unexpected data structure
+                print("Unexpected friends data structure: \(snapshot.value ?? "nil")")
+                completion([])
+                return
+            }
+
+            let sortedFriends = friends.sorted {
+                $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+            }
+            completion(sortedFriends)
+            
+        } withCancel: { error in
+            print("Error fetching friends: \(error.localizedDescription)")
+            completion([])
+        }
+    }
+    
     func addFriend(friendId: String) {
         guard let currentUser = Auth.auth().currentUser else { return }
         let currentUserId = currentUser.uid

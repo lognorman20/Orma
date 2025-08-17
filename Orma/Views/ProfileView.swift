@@ -39,14 +39,16 @@ struct ProfileView: View {
 
                     FriendsSectionView(
                         user: user,
-                        selectedTab: $selectedTab,
-                        pendingRequests: pendingFriendRequests,
                         onAcceptRequest: acceptFriendRequest,
-                        onDeclineRequest: declineFriendRequest
+                        onDeclineRequest: declineFriendRequest,
+                        selectedTab: $selectedTab
                     )
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
+            }
+            .refreshable {
+                getFriendRequests()
             }
             .background(
                 LinearGradient(
@@ -67,13 +69,13 @@ struct ProfileView: View {
 
     // MARK: - Computed Properties
     func getFriendRequests() {
-        OrmaUserService().fetchPendingFriendRequests {  requests in
+        OrmaUserService().fetchPendingFriendRequests { requests in
             DispatchQueue.main.async {
                 self.pendingFriendRequests = requests
             }
         }
     }
-    
+
     // MARK: - Methods
     func sendFriendRequest() {
         let trimmedUsername = newFriendUsername.trimmingCharacters(
@@ -98,7 +100,8 @@ struct ProfileView: View {
     }
 
     private func declineFriendRequest(_ request: FriendRequest) {
-        
+        OrmaUserService().declineFriendRequest(friendId: request.fromId)
+        getFriendRequests()
     }
 
     private func fetchUsernameMatches(for query: String) {
@@ -106,22 +109,39 @@ struct ProfileView: View {
             usernameMatches = []
             return
         }
-        let ref = Database.database().reference().child("users")
-        ref.queryOrdered(byChild: "username")
-            .queryStarting(atValue: query)
-            .queryEnding(atValue: query + "\u{f8ff}")
-            .observeSingleEvent(of: .value) { snapshot in
-                var results: [String] = []
-                for child in snapshot.children {
-                    if let snap = child as? DataSnapshot,
-                        let dict = snap.value as? [String: Any],
-                        let username = dict["username"] as? String
-                    {
-                        results.append(username)
+
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let currentUserId = currentUser.uid
+        let usersRef = Database.database().reference().child("users")
+
+        // Fetch current user's friends first
+        usersRef.child(currentUserId).child("friends").observeSingleEvent(
+            of: .value
+        ) { snap in
+            let currentFriendIds: [String] =
+                (snap.value as? [[String: Any]])?.compactMap {
+                    $0["id"] as? String
+                } ?? []
+
+            // Now query users by username
+            usersRef.queryOrdered(byChild: "username")
+                .queryStarting(atValue: query)
+                .queryEnding(atValue: query + "\u{f8ff}")
+                .observeSingleEvent(of: .value) { snapshot in
+                    var results: [String] = []
+                    for child in snapshot.children {
+                        if let snap = child as? DataSnapshot,
+                            let dict = snap.value as? [String: Any],
+                            let username = dict["username"] as? String,
+                            snap.key != currentUserId,
+                            !currentFriendIds.contains(snap.key)
+                        {
+                            results.append(username)
+                        }
                     }
+                    self.usernameMatches = results
                 }
-                self.usernameMatches = results
-            }
+        }
     }
 
     func signOut() {
@@ -380,16 +400,17 @@ struct AddFriendButtonView: View {
 // MARK: - FriendsSectionView
 struct FriendsSectionView: View {
     let user: OrmaUser
-    @Binding var selectedTab: ProfileView.FriendsTab
-    let pendingRequests: [FriendRequest]
     let onAcceptRequest: (FriendRequest) -> Void
     let onDeclineRequest: (FriendRequest) -> Void
+    @Binding var selectedTab: ProfileView.FriendsTab
+    @State public var pendingRequests: [FriendRequest] = []
+    @State public var friends: [OrmaFriend] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             FriendsSectionHeaderView(
                 selectedTab: selectedTab,
-                friendsCount: user.friends.count,
+                friendsCount: friends.count,
                 requestsCount: pendingRequests.count
             )
 
@@ -397,7 +418,7 @@ struct FriendsSectionView: View {
 
             Group {
                 if selectedTab == .friends {
-                    FriendsListView(friends: user.friends)
+                    FriendsListView(friends: friends)
                 } else {
                     FriendRequestsListView(
                         requests: pendingRequests,
@@ -414,6 +435,32 @@ struct FriendsSectionView: View {
                 .fill(.regularMaterial)
                 .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
+        .onAppear {
+            getFriends()
+            getFriendRequests()
+        }
+        .refreshable {
+            getFriends()
+            getFriendRequests()
+        }
+    }
+
+    func getFriends() {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        OrmaUserService().fetchAllFriends(userId: currentUserId) {
+            fetchedFriends in
+            DispatchQueue.main.async {
+                self.friends = fetchedFriends
+            }
+        }
+    }
+    
+    func getFriendRequests() {
+        OrmaUserService().fetchPendingFriendRequests { requests in
+            DispatchQueue.main.async {
+                self.pendingRequests = requests
+            }
+        }
     }
 }
 
@@ -600,7 +647,7 @@ struct FriendRequestRowView: View {
     let onAccept: () -> Void
     let onDecline: () -> Void
     @State private var displayName: String = ""
-    
+
     var body: some View {
         HStack(spacing: 12) {
             UserAvatarView(
@@ -608,20 +655,20 @@ struct FriendRequestRowView: View {
                 colors: [.orange, .red],
                 size: 40
             )
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(displayName)
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-                
+
                 Text("sent a friend request")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
-            
+
             FriendRequestActionsView(
                 onAccept: onAccept,
                 onDecline: onDecline
@@ -633,7 +680,7 @@ struct FriendRequestRowView: View {
             getDisplayName(from: request)
         }
     }
-    
+
     func getDisplayName(from request: FriendRequest) {
         PostService().getDisplayName(creatorId: request.fromId) { name in
             DispatchQueue.main.async {
