@@ -216,6 +216,7 @@ private struct ActionsView: View {
 private struct ReplyIndicatorView: View {
     let referenceId: String
     @State private var referencedComment: Comment?
+    @State private var referenceCommentCreatorDisplayName: String = ""
 
     var body: some View {
         VStack {
@@ -227,7 +228,7 @@ private struct ReplyIndicatorView: View {
                         .clipShape(Capsule())
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(referenced.creatorDisplayName)
+                        Text(referenceCommentCreatorDisplayName)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.blue)
 
@@ -249,15 +250,27 @@ private struct ReplyIndicatorView: View {
             }
         }.onAppear {
             fetchReferencedComment(referenceId: referenceId)
+            fetchReferenceCreatorDisplayName(referenceId: referenceId)
         }
     }
 
+    // TODO: rename parameter to reflect creator id
     func fetchReferencedComment(referenceId: String) {
         Task {
             if let c = try? await PostService().getCommentById(
                 commentId: referenceId)
             {
                 await MainActor.run { referencedComment = c }
+            }
+        }
+    }
+    
+    // TODO: rename parameter to reflect creator id
+    func fetchReferenceCreatorDisplayName(referenceId: String) {
+        PostService().getDisplayName(creatorId: referenceId) {
+            name in
+            DispatchQueue.main.async {
+                self.referenceCommentCreatorDisplayName = name ?? "Unknown user"
             }
         }
     }
