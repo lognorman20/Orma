@@ -19,10 +19,16 @@ class LoginViewModel: ObservableObject {
                 case .success(let user):
                     let ormaUser = OrmaUser.shared
                     ormaUser.firebaseUser = user
+
                     if let displayName = user.displayName, !displayName.isEmpty {
                         ormaUser.displayName = displayName
-                        ormaUser.username = displayName.components(separatedBy: CharacterSet.alphanumerics.inverted).joined()
+                        ormaUser.username = displayName
+                            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                            .joined()
                     }
+
+                    // refresh from Firebase to get display name + friends
+                    ormaUser.refreshUserData()
 
                     KeychainService.saveUser(user)
                     if let token = user.refreshToken {
@@ -35,4 +41,5 @@ class LoginViewModel: ObservableObject {
             }
         }
     }
+
 }
