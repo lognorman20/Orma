@@ -54,7 +54,6 @@ struct PostView: View {
 
             PostContentView(
                 post: post,
-                comments: post.comments,
                 showFullDescription: $showFullDescription,
                 showComments: $showComments,
                 newCommentText: $newCommentText,
@@ -246,14 +245,35 @@ struct PostImageView: View {
 
 struct PostContentView: View {
     let post: Post
-    let comments: [Comment]
     @Binding var showFullDescription: Bool
     @Binding var showComments: Bool
     @Binding var newCommentText: String
     @Binding var isSubmittingComment: Bool
     @Binding var isLiked: Bool
     let userGradientFirstColor: Color
-
+    @StateObject var commentViewModel: CommentViewModel
+    
+    init(
+        post: Post,
+        comments: [Comment] = [],
+        showFullDescription: Binding<Bool>,
+        showComments: Binding<Bool>,
+        newCommentText: Binding<String>,
+        isSubmittingComment: Binding<Bool>,
+        isLiked: Binding<Bool>,
+        userGradientFirstColor: Color,
+        commentViewModel: CommentViewModel = CommentViewModel()
+    ) {
+        self.post = post
+        self._showFullDescription = showFullDescription
+        self._showComments = showComments
+        self._newCommentText = newCommentText
+        self._isSubmittingComment = isSubmittingComment
+        self._isLiked = isLiked
+        self.userGradientFirstColor = userGradientFirstColor
+        self._commentViewModel = StateObject(wrappedValue: commentViewModel)
+    }
+    
     var body: some View {
         VStack(spacing: 10) {
             if !post.description.isEmpty {
@@ -316,18 +336,22 @@ struct PostContentView: View {
 
                 Spacer()
 
-                if !comments.isEmpty {
+                let totalComments = commentViewModel.comments.count
+                if totalComments > 0 {
                     Button {
                         showComments.toggle()
                     } label: {
                         Text(
-                            "\(comments.count) comment\(comments.count == 1 ? "" : "s")"
+                            "\(totalComments) comment\(totalComments == 1 ? "" : "s")"
                         )
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
                     }
                 }
             }
+        }
+        .onAppear {
+            fetchComments()
         }
     }
 
@@ -337,6 +361,10 @@ struct PostContentView: View {
             PostService().likePost(postId: post.id, userId: currentUser.uid)
             isLiked.toggle()
         }
+    }
+    
+    private func fetchComments() {
+        commentViewModel.refreshComments(postId: post.id)
     }
 }
 
