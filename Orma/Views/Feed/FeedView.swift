@@ -44,7 +44,7 @@ struct FeedView: View {
                     
                     // Content
                     LazyVStack(spacing: 12) {
-                        ForEach(filteredPosts, id: \.id) { post in
+                        ForEach(feedViewModel.posts, id: \.id) { post in
                             PostView(post: post)
                         }
                     }
@@ -219,22 +219,13 @@ struct FeedView: View {
         }
     }
     
-    private var filteredPosts: [Post] {
-        switch selectedFilter {
-        case .everyone:
-            return feedViewModel.posts
-        case .friends:
-            return feedViewModel.posts.filter { $0.isFriend } // Assuming Post has isFriend property
-        }
-    }
-    
     private func applyFilter(_ filter: FeedFilter) {
-//        switch filter {
-//        case .everyone:
-//            feedViewModel.loadAllPosts()
-//        case .friends:
-//            feedViewModel.loadFriendsOnlyPosts()
-//        }
+        switch filter {
+        case .everyone:
+            feedViewModel.fetchAllPosts()
+        case .friends:
+            feedViewModel.fetchFriendsPosts()
+        }
     }
 }
 
@@ -244,15 +235,6 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
     
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
-    }
-}
-
-// Extension for Post model (add this to your Post model if not already present)
-extension Post {
-    var isFriend: Bool {
-        // Replace with your actual logic for determining if a post is from a friend
-        // This could be based on user relationship, following status, etc.
-        return true // Placeholder
     }
 }
 
