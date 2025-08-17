@@ -12,33 +12,33 @@ import SwiftUI
 class PostService {
     var dbRef: DatabaseReference! = Database.database().reference()
     var storageRef = Storage.storage().reference()
-
+    
     func likePost(postId: String, userId: String) {
         let postsRef = dbRef.child("posts")
         let query = postsRef.queryOrdered(byChild: "id").queryEqual(
             toValue: postId)
-
+        
         query.observeSingleEvent(of: .value) { snapshot in
             guard snapshot.exists() else {
                 print("Post not found: \(postId)")
                 return
             }
-
+            
             for child in snapshot.children {
                 guard let childSnapshot = child as? DataSnapshot,
-                    let postData = childSnapshot.value as? [String: Any]
+                      let postData = childSnapshot.value as? [String: Any]
                 else {
                     continue
                 }
-
+                
                 var likedBy = postData["likedBy"] as? [String] ?? []
-
+                
                 if likedBy.contains(userId) {
                     likedBy.removeAll { $0 == userId }
                 } else {
                     likedBy.append(userId)
                 }
-
+                
                 postsRef.child(childSnapshot.key).child("likedBy").setValue(
                     likedBy
                 ) { error, _ in
@@ -52,61 +52,61 @@ class PostService {
             }
         }
     }
-
+    
     func isLiked(
         postId: String, userId: String, completion: @escaping (Bool) -> Void
     ) {
         let postsRef = dbRef.child("posts")
         let query = postsRef.queryOrdered(byChild: "id").queryEqual(
             toValue: postId)
-
+        
         query.observeSingleEvent(of: .value) { snapshot in
             guard snapshot.exists() else {
                 print("Post not found: \(postId)")
                 completion(false)
                 return
             }
-
+            
             for child in snapshot.children {
                 guard let childSnapshot = child as? DataSnapshot,
-                    let postData = childSnapshot.value as? [String: Any]
+                      let postData = childSnapshot.value as? [String: Any]
                 else { continue }
-
+                
                 let likedBy = postData["likedBy"] as? [String] ?? []
                 completion(likedBy.contains(userId))
                 return
             }
-
+            
             completion(false)
         }
     }
-
+    
     func getComments(postId: String, completion: @escaping ([Comment]) -> Void)
     {
         let commentsRef = dbRef.child("comments")
             .queryOrdered(byChild: "postId")
             .queryEqual(toValue: postId)
-
+        
         commentsRef.observeSingleEvent(of: .value) { snapshot in
             var comments: [Comment] = []
             let isoFormatter = ISO8601DateFormatter()
-
+            
             for case let snap as DataSnapshot in snapshot.children {
                 guard let dict = snap.value as? [String: Any],
-                    let id = dict["id"] as? String,
-                    let creatorId = dict["creatorId"] as? String,
-                    let creatorDisplayName = dict["creatorDisplayName"] as? String,
-                    let postId = dict["postId"] as? String,
-                    let createdAtString = dict["createdAt"] as? String,
-                    let createdAt = isoFormatter.date(from: createdAtString),
-                    let text = dict["text"] as? String
+                      let id = dict["id"] as? String,
+                      let creatorId = dict["creatorId"] as? String,
+                      let creatorDisplayName = dict["creatorDisplayName"] as? String,
+                      let postId = dict["postId"] as? String,
+                      let createdAtString = dict["createdAt"] as? String,
+                      let createdAt = isoFormatter.date(from: createdAtString),
+                      let text = dict["text"] as? String
                 else {
                     print("Skipping: invalid data in snapshot \(snap.key)")
                     continue
                 }
-
+                
                 let referenceCommentId = dict["referenceCommentId"] as? String
-
+                
                 let comment = Comment(
                     id: id,
                     creatorId: creatorId,
@@ -116,15 +116,15 @@ class PostService {
                     text: text,
                     referenceCommentId: referenceCommentId
                 )
-
+                
                 comments.append(comment)
             }
-
+            
             print("Got \(comments.count) comments for postId: \(postId)")
             completion(comments)
         }
     }
-
+    
     func getCommentById(commentId: String) async throws -> Comment? {
         try await withCheckedThrowingContinuation { continuation in
             let query = dbRef.child("comments").queryOrdered(byChild: "id").queryEqual(toValue: commentId)
@@ -154,7 +154,7 @@ class PostService {
         postsRef.observeSingleEvent(of: .value) { snapshot in
             var posts: [Post] = []
             let isoFormatter = ISO8601DateFormatter()
-
+            
             for case let snap as DataSnapshot in snapshot.children {
                 guard let dict = snap.value as? [String: Any],
                       let id = dict["id"] as? String,
@@ -168,10 +168,10 @@ class PostService {
                 else {
                     continue
                 }
-
+                
                 // filter by friend IDs
                 guard friendIds.contains(creatorId) else { continue }
-
+                
                 let likedBy = dict["likedBy"] as? [String] ?? []
                 let commentsData = dict["comments"] as? [[String: Any]] ?? []
                 let comments: [Comment] = commentsData.compactMap { commentDict in
@@ -180,7 +180,7 @@ class PostService {
                         from: JSONSerialization.data(withJSONObject: commentDict)
                     )
                 }
-
+                
                 let post = Post(
                     id: id,
                     creatorId: creatorId,
@@ -192,10 +192,10 @@ class PostService {
                     description: description,
                     comments: comments
                 )
-
+                
                 posts.append(post)
             }
-
+            
             print("Got \(posts.count) posts from friends")
             completion(posts)
         }
@@ -206,28 +206,28 @@ class PostService {
         postsRef.observeSingleEvent(of: .value) { snapshot in
             var posts: [Post] = []
             let isoFormatter = ISO8601DateFormatter()
-
+            
             for case let snap as DataSnapshot in snapshot.children {
                 guard let dict = snap.value as? [String: Any] else {
                     print("Skipping: not a dictionary for snapshot \(snap.key)")
                     continue
                 }
-
+                
                 guard let id = dict["id"] as? String,
-                    let creatorId = dict["creatorId"] as? String,
-                    let creatorDisplayName = dict["creatorDisplayName"] as? String,
-                    let createdAtString = dict["createdAt"] as? String,
-                    let createdAt = isoFormatter.date(from: createdAtString),
-                    let imagePath = dict["imagePath"] as? String,
-                    let reference = dict["reference"] as? String,
-                    let description = dict["description"] as? String
+                      let creatorId = dict["creatorId"] as? String,
+                      let creatorDisplayName = dict["creatorDisplayName"] as? String,
+                      let createdAtString = dict["createdAt"] as? String,
+                      let createdAt = isoFormatter.date(from: createdAtString),
+                      let imagePath = dict["imagePath"] as? String,
+                      let reference = dict["reference"] as? String,
+                      let description = dict["description"] as? String
                 else {
                     print(
                         "Skipping: missing required fields in snapshot \(snap.key): \(dict)"
                     )
                     continue
                 }
-
+                
                 let likedBy = dict["likedBy"] as? [String] ?? []
                 let commentsData = dict["comments"] as? [[String: Any]] ?? []
                 let comments: [Comment] = commentsData.compactMap {
@@ -237,7 +237,7 @@ class PostService {
                         from: JSONSerialization.data(
                             withJSONObject: commentDict))
                 }
-
+                
                 let post = Post(
                     id: id,
                     creatorId: creatorId,
@@ -249,15 +249,15 @@ class PostService {
                     description: description,
                     comments: comments
                 )
-
+                
                 posts.append(post)
             }
-
+            
             print("Got \(posts.count) posts total")
             completion(posts)
         }
     }
-
+    
     func getImage(
         from urlString: String, completion: @escaping (UIImage?) -> Void
     ) {
@@ -266,7 +266,7 @@ class PostService {
             completion(nil)
             return
         }
-
+        
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Error fetching image:", error)
@@ -286,7 +286,7 @@ class PostService {
     
     func getDisplayName(creatorId: String, completion: @escaping (String?) -> Void) {
         let userRef = dbRef.child("users").child(creatorId)
-
+        
         userRef.observeSingleEvent(of: .value) { snapshot in
             guard snapshot.exists(),
                   let dict = snapshot.value as? [String: Any],
@@ -295,7 +295,7 @@ class PostService {
                 completion(nil)
                 return
             }
-
+            
             completion(displayName)
         }
     }
@@ -306,7 +306,7 @@ class PostService {
         referenceCommentId: String? = nil
     ) async throws {
         guard let firebaseUser = OrmaUser.shared.firebaseUser else { return }
-
+        
         let commentId = UUID().uuidString
         let commentData: [String: Any] = [
             "id": commentId,
@@ -317,7 +317,7 @@ class PostService {
             "text": text,
             "referenceCommentId": referenceCommentId ?? "",
         ]
-
+        
         try await withCheckedThrowingContinuation {
             (continuation: CheckedContinuation<Void, Error>) in
             dbRef.child("comments").childByAutoId().setValue(commentData) {
@@ -329,17 +329,17 @@ class PostService {
                 }
             }
         }
-
+        
         print("Successfully created comment for post \(postId)")
     }
-
+    
     func createPost(image: UIImage, reference: String, description: String)
-        async throws
+    async throws
     {
         guard let firebaseUser = OrmaUser.shared.firebaseUser else { return }
         // store the image in Cloud Storage
         let imagePath = try await uploadImage(image, for: firebaseUser)
-
+        
         // store the post in Firestore with currentUser info
         let postId = UUID().uuidString
         let postData: [String: Any] = [
@@ -362,10 +362,10 @@ class PostService {
                 }
             }
         }
-
+        
         print("Successfully posted!")
     }
-
+    
     func uploadImage(_ image: UIImage, for user: User) async throws -> URL {
         guard
             // TODO: this doesnt really do anything...
@@ -383,11 +383,54 @@ class PostService {
                     NSLocalizedDescriptionKey: "Unsupported image format"
                 ])
         }
-
+        
         let filename = "\(user.uid)/\(UUID().uuidString).\(fileExtension)"
         let imageRef = storageRef.child(filename)
-
+        
         let _ = try await imageRef.putDataAsync(imageData, metadata: nil)
         return try await imageRef.downloadURL()
+    }
+    
+    func fetchUserStreak(userId: String, completion: @escaping ([StreakDay], Int) -> Void) {
+        let postsRef = dbRef.child("posts")
+        postsRef.queryOrdered(byChild: "creatorId").queryEqual(toValue: userId)
+            .observeSingleEvent(of: .value) { snapshot in
+
+            var postedDates = Set<Date>()
+            let calendar = Calendar.current
+            let isoFormatter = ISO8601DateFormatter()
+
+            for case let snap as DataSnapshot in snapshot.children {
+                guard let dict = snap.value as? [String: Any],
+                      let createdAtString = dict["createdAt"] as? String,
+                      let createdAt = isoFormatter.date(from: createdAtString)
+                else { continue }
+
+                let startOfDay = calendar.startOfDay(for: createdAt)
+                postedDates.insert(startOfDay)
+            }
+
+            var streakDays: [StreakDay] = []
+            for i in 0..<14 {
+                guard let day = calendar.date(byAdding: .day, value: -i, to: Date()) else { continue }
+                let startOfDay = calendar.startOfDay(for: day)
+                let hasPosted = postedDates.contains(startOfDay) ? true : nil
+                streakDays.append(StreakDay(date: startOfDay, hasPosted: hasPosted))
+            }
+
+            streakDays.sort { $0.date < $1.date }
+
+            // Calculate current streak length
+            var streakCount = 0
+            var dayIterator = calendar.startOfDay(for: Date())
+
+            while postedDates.contains(dayIterator) {
+                streakCount += 1
+                guard let previousDay = calendar.date(byAdding: .day, value: -1, to: dayIterator) else { break }
+                dayIterator = previousDay
+            }
+
+            completion(streakDays, streakCount)
+        }
     }
 }

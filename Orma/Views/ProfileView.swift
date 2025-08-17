@@ -27,8 +27,10 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack {
+                VStack(spacing: 24) {
                     ProfileHeaderView(user: user, onSignOut: signOut, onUpdateDisplayName: updateDisplayName)
+                    
+                    StreaksView()
 
                     AddFriendSectionView(
                         newFriendUsername: $newFriendUsername,
@@ -490,9 +492,14 @@ struct AddFriendSectionView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(.regularMaterial)
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         )
+//        .background(
+//            RoundedRectangle(cornerRadius: 16)
+//                .fill(.regularMaterial)
+//                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+//        )
     }
 }
 
@@ -655,15 +662,14 @@ struct FriendsSectionView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(.regularMaterial)
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         )
-        .onAppear {
-            // Friends are now managed by parent view
-        }
-        .refreshable {
-            // Friends refresh is now handled by parent view
-        }
+//        .background(
+//            RoundedRectangle(cornerRadius: 16)
+//                .fill(.regularMaterial)
+//                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+//        )
     }
 }
 
