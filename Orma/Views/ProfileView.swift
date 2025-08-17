@@ -15,6 +15,7 @@ struct ProfileView: View {
     @State private var newFriendUsername: String = ""
     @State private var usernameMatches: [String] = []
     @State private var selectedTab: FriendsTab = .friends
+    @State private var pendingFriendRequests: [FriendRequest] = []
     @FocusState private var isUsernameFocused: Bool
 
     enum FriendsTab: String, CaseIterable {
@@ -60,15 +61,19 @@ struct ProfileView: View {
         }
         .onAppear {
             user = OrmaUser.shared
+            getFriendRequests()
         }
     }
 
     // MARK: - Computed Properties
-    private var pendingFriendRequests: [FriendRequest] {
-        // Replace with actual data from your user model
-        return []
+    func getFriendRequests() {
+        OrmaUserService().fetchPendingFriendRequests {  requests in
+            DispatchQueue.main.async {
+                self.pendingFriendRequests = requests
+            }
+        }
     }
-
+    
     // MARK: - Methods
     func sendFriendRequest() {
         let trimmedUsername = newFriendUsername.trimmingCharacters(
@@ -88,11 +93,12 @@ struct ProfileView: View {
     }
 
     private func acceptFriendRequest(_ request: FriendRequest) {
-        print("Accepting friend request from \(request.displayName)")
+        OrmaUserService().addFriend(friendId: request.fromId)
+        getFriendRequests()
     }
 
     private func declineFriendRequest(_ request: FriendRequest) {
-        print("Declining friend request from \(request.displayName)")
+        
     }
 
     private func fetchUsernameMatches(for query: String) {
@@ -555,7 +561,7 @@ struct FriendRequestsListView: View {
             EmptyRequestsView()
         } else {
             LazyVStack(spacing: 12) {
-                ForEach(requests, id: \.id) { request in
+                ForEach(requests, id: \.fromId) { request in
                     FriendRequestRowView(
                         request: request,
                         onAccept: { onAccept(request) },
@@ -593,28 +599,29 @@ struct FriendRequestRowView: View {
     let request: FriendRequest
     let onAccept: () -> Void
     let onDecline: () -> Void
-
+    @State private var displayName: String = ""
+    
     var body: some View {
         HStack(spacing: 12) {
             UserAvatarView(
-                displayName: request.displayName,
+                displayName: displayName,
                 colors: [.orange, .red],
                 size: 40
             )
-
+            
             VStack(alignment: .leading, spacing: 2) {
-                Text(request.displayName)
+                Text(displayName)
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-
-                Text("Wants to be friends")
+                
+                Text("sent a friend request")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-
+            
             Spacer()
-
+            
             FriendRequestActionsView(
                 onAccept: onAccept,
                 onDecline: onDecline
@@ -622,6 +629,17 @@ struct FriendRequestRowView: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
+        .onAppear {
+            getDisplayName(from: request)
+        }
+    }
+    
+    func getDisplayName(from request: FriendRequest) {
+        PostService().getDisplayName(creatorId: request.fromId) { name in
+            DispatchQueue.main.async {
+                self.displayName = name ?? "Unknown Person"
+            }
+        }
     }
 }
 
@@ -687,9 +705,9 @@ struct UserAvatarView: View {
 
 // MARK: - Supporting Models
 struct FriendRequest {
-    let id: String
-    let displayName: String
-    let username: String
+    let fromId: String
+    let toId: String
+    let timestamp: String
 }
 
 // Assuming you have a Friend model - adjust as needed

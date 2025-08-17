@@ -95,12 +95,14 @@ class OrmaUser: ObservableObject {
 class OrmaUserService {
     var dbRef: DatabaseReference! = Database.database().reference()
     var storageRef = Storage.storage().reference()
-    
-    func getUserIdIfExists(username: String, completion: @escaping (String?) -> Void) {
+
+    func getUserIdIfExists(
+        username: String, completion: @escaping (String?) -> Void
+    ) {
         let usersRef = dbRef.child("users")
             .queryOrdered(byChild: "username")
             .queryEqual(toValue: username)
-        
+
         usersRef.observeSingleEvent(of: .value) { snapshot in
             if let child = snapshot.children.allObjects.first as? DataSnapshot {
                 completion(child.key)
@@ -109,15 +111,55 @@ class OrmaUserService {
             }
         }
     }
-    
+
     // { friendRequests/fromId/toId/timestamp }
     func sendFriendRequest(friendId: String) {
         guard let currentUser = Auth.auth().currentUser else { return }
-        let requestRef = dbRef.child("friendRequests").child(currentUser.uid).child(friendId)
+        let requestRef = dbRef.child("friendRequests").child(currentUser.uid)
+            .child(friendId)
 
         requestRef.setValue(ServerValue.timestamp())
     }
-    
+
+    func fetchPendingFriendRequests(
+        completion: @escaping ([FriendRequest]) -> Void
+    ) {
+        guard let currentUser = Auth.auth().currentUser else {
+            completion([])
+            return
+        }
+
+        let requestsRef = dbRef.child("friendRequests")
+        requestsRef.observeSingleEvent(of: .value) { snapshot in
+            var requests: [FriendRequest] = []
+
+            for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                let fromId = child.key
+                if let toDict = child.value as? [String: Any] {
+                    for (toId, value) in toDict {
+                        let timestamp: String
+                        if let ts = value as? Double {
+                            let date = Date(timeIntervalSince1970: ts / 1000)
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .short
+                            formatter.timeStyle = .short
+                            timestamp = formatter.string(from: date)
+                        } else {
+                            timestamp = ""
+                        }
+                        let request = FriendRequest(
+                            fromId: fromId, toId: toId, timestamp: timestamp)
+                        if toId == currentUser.uid {
+                            requests.append(request)
+                        }
+                    }
+                }
+            }
+
+            completion(requests)
+        }
+    }
+
     func addFriend(friendId: String) {
         guard let currentUser = Auth.auth().currentUser else { return }
         let currentUserId = currentUser.uid
@@ -180,6 +222,11 @@ class OrmaUserService {
                 }
             }
         }
+        
+        // remove friend request from requests
+        let requestsRef = dbRef.child("friendRequests")
+        requestsRef.child(currentUserId).child(friendId).removeValue()
+        requestsRef.child(friendId).child(currentUserId).removeValue()
     }
 
     func removeFriend(friendId: String) {
