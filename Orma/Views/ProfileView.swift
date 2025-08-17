@@ -16,6 +16,7 @@ struct ProfileView: View {
     @State private var usernameMatches: [String] = []
     @State private var selectedTab: FriendsTab = .friends
     @State private var pendingFriendRequests: [FriendRequest] = []
+    @State private var friends: [OrmaFriend] = []
     @FocusState private var isUsernameFocused: Bool
 
     enum FriendsTab: String, CaseIterable {
@@ -41,7 +42,9 @@ struct ProfileView: View {
                         user: user,
                         onAcceptRequest: acceptFriendRequest,
                         onDeclineRequest: declineFriendRequest,
-                        selectedTab: $selectedTab
+                        selectedTab: $selectedTab,
+                        pendingRequests: $pendingFriendRequests,
+                        friends: $friends
                     )
                 }
                 .padding(.horizontal, 20)
@@ -49,6 +52,7 @@ struct ProfileView: View {
             }
             .refreshable {
                 getFriendRequests()
+                getFriends()
             }
             .background(
                 LinearGradient(
@@ -64,6 +68,7 @@ struct ProfileView: View {
         .onAppear {
             user = OrmaUser.shared
             getFriendRequests()
+            getFriends()
         }
     }
 
@@ -74,6 +79,21 @@ struct ProfileView: View {
                 self.pendingFriendRequests = requests
             }
         }
+    }
+    
+    func getFriends() {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        OrmaUserService().fetchAllFriends(userId: currentUserId) { fetchedFriends in
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    self.friends = fetchedFriends
+                }
+            }
+        }
+    }
+    
+    func refreshFriendsList() {
+        getFriends()
     }
 
     // MARK: - Methods
@@ -95,13 +115,46 @@ struct ProfileView: View {
     }
 
     private func acceptFriendRequest(_ request: FriendRequest) {
-        OrmaUserService().addFriend(friendId: request.fromId)
-        getFriendRequests()
+        // Get the display name for the new friend
+        PostService().getDisplayName(creatorId: request.fromId) { displayName in
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    // Remove from requests
+                    self.pendingFriendRequests.removeAll { $0.fromId == request.fromId }
+                    
+                    // Add to friends list instantly
+                    let newFriend = OrmaFriend(
+                        id: request.fromId,
+                        displayName: displayName ?? "Unknown User",
+                        username: "" // We'll get this from the backend refresh
+                    )
+                    self.friends.append(newFriend)
+                    
+                    // Sort the friends list
+                    self.friends.sort {
+                        $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+                    }
+                }
+                
+                // Perform the actual backend operation
+                OrmaUserService().addFriend(friendId: request.fromId)
+                
+                // Refresh friends list to get complete data (including username)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.refreshFriendsList()
+                }
+            }
+        }
     }
 
     private func declineFriendRequest(_ request: FriendRequest) {
+        // Instantly remove from UI with animation
+        withAnimation(.easeInOut(duration: 0.3)) {
+            pendingFriendRequests.removeAll { $0.fromId == request.fromId }
+        }
+        
+        // Perform the actual operation
         OrmaUserService().declineFriendRequest(friendId: request.fromId)
-        getFriendRequests()
     }
 
     private func fetchUsernameMatches(for query: String) {
@@ -403,8 +456,8 @@ struct FriendsSectionView: View {
     let onAcceptRequest: (FriendRequest) -> Void
     let onDeclineRequest: (FriendRequest) -> Void
     @Binding var selectedTab: ProfileView.FriendsTab
-    @State public var pendingRequests: [FriendRequest] = []
-    @State public var friends: [OrmaFriend] = []
+    @Binding var pendingRequests: [FriendRequest]
+    @Binding var friends: [OrmaFriend]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -414,7 +467,10 @@ struct FriendsSectionView: View {
                 requestsCount: pendingRequests.count
             )
 
-            FriendsTabSelectorView(selectedTab: $selectedTab)
+            FriendsTabSelectorView(
+                selectedTab: $selectedTab,
+                requestsCount: pendingRequests.count
+            )
 
             Group {
                 if selectedTab == .friends {
@@ -436,30 +492,10 @@ struct FriendsSectionView: View {
                 .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
         .onAppear {
-            getFriends()
-            getFriendRequests()
+            // Friends are now managed by parent view
         }
         .refreshable {
-            getFriends()
-            getFriendRequests()
-        }
-    }
-
-    func getFriends() {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-        OrmaUserService().fetchAllFriends(userId: currentUserId) {
-            fetchedFriends in
-            DispatchQueue.main.async {
-                self.friends = fetchedFriends
-            }
-        }
-    }
-    
-    func getFriendRequests() {
-        OrmaUserService().fetchPendingFriendRequests { requests in
-            DispatchQueue.main.async {
-                self.pendingRequests = requests
-            }
+            // Friends refresh is now handled by parent view
         }
     }
 }
@@ -485,14 +521,12 @@ struct FriendsSectionHeaderView: View {
             Text("\(selectedTab == .friends ? friendsCount : requestsCount)")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(selectedTab == .friends ? .green : .orange)
+                .foregroundColor(.white)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)
                 .background(
                     Capsule()
-                        .fill(
-                            selectedTab == .friends ? Color.green : Color.orange
-                        )
+                        .fill(selectedTab == .friends ? Color.green : Color.orange)
                 )
         }
     }
@@ -501,6 +535,8 @@ struct FriendsSectionHeaderView: View {
 // MARK: - FriendsTabSelectorView
 struct FriendsTabSelectorView: View {
     @Binding var selectedTab: ProfileView.FriendsTab
+    let requestsCount: Int
+    @State private var pulseAnimation = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -510,34 +546,81 @@ struct FriendsTabSelectorView: View {
                         selectedTab = tab
                     }
                 }) {
-                    VStack(spacing: 4) {
-                        Text(tab.rawValue)
-                            .font(.subheadline)
-                            .fontWeight(
-                                selectedTab == tab ? .semibold : .medium
-                            )
-                            .foregroundColor(
-                                selectedTab == tab ? .primary : .secondary)
+                    HStack(spacing: 8) {
+                        VStack(spacing: 4) {
+                            Text(tab.rawValue)
+                                .font(.subheadline)
+                                .fontWeight(
+                                    selectedTab == tab ? .semibold : .medium
+                                )
+                                .foregroundColor(
+                                    selectedTab == tab ? .primary : .secondary)
 
-                        Rectangle()
-                            .fill(
-                                selectedTab == tab
-                                    ? (tab == .friends ? .green : .orange)
-                                    : .clear
-                            )
-                            .frame(height: 2)
+                            Rectangle()
+                                .fill(
+                                    selectedTab == tab
+                                        ? (tab == .friends ? .green : .orange)
+                                        : .clear
+                                )
+                                .frame(height: 2)
+                        }
+                        
+                        // Animated badge for pending requests
+                        if tab == .requests && requestsCount > 0 {
+                            ZStack {
+                                // Pulsing background circle
+                                Circle()
+                                    .fill(.blue.opacity(0.3))
+                                    .frame(width: 16, height: 16)
+                                    .scaleEffect(pulseAnimation ? 1.8 : 1.0)
+                                    .opacity(pulseAnimation ? 0.2 : 0.6)
+                                    .animation(
+                                        .easeInOut(duration: 1.5)
+                                        .repeatForever(autoreverses: true),
+                                        value: pulseAnimation
+                                    )
+                                
+                                // Main badge circle
+                                Circle()
+                                    .fill(.blue)
+                                    .frame(width: 8, height: 8)
+                                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
+                                    .animation(
+                                        .easeInOut(duration: 1.5)
+                                        .repeatForever(autoreverses: true),
+                                        value: pulseAnimation
+                                    )
+                            }
+                            .transition(.scale.combined(with: .opacity))
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
             }
         }
         .padding(.bottom, 8)
+        .onAppear {
+            if requestsCount > 0 {
+                pulseAnimation = true
+            }
+        }
+        .onChange(of: requestsCount) { oldValue, newValue in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                if newValue > 0 && oldValue == 0 {
+                    // Started getting requests
+                    pulseAnimation = true
+                } else if newValue == 0 && oldValue > 0 {
+                    // No more requests
+                    pulseAnimation = false
+                }
+            }
+        }
     }
 }
 
 // MARK: - FriendsListView
 struct FriendsListView: View {
-    let friends: [Friend]  // Assuming Friend is your friend model type
+    let friends: [OrmaFriend]
 
     var body: some View {
         if friends.isEmpty {
@@ -546,6 +629,10 @@ struct FriendsListView: View {
             LazyVStack(spacing: 8) {
                 ForEach(friends, id: \.id) { friend in
                     FriendRowView(friend: friend)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
                 }
             }
         }
@@ -575,7 +662,7 @@ struct EmptyFriendsView: View {
 
 // MARK: - FriendRowView
 struct FriendRowView: View {
-    let friend: Friend
+    let friend: OrmaFriend
 
     var body: some View {
         HStack(spacing: 12) {
@@ -614,6 +701,10 @@ struct FriendRequestsListView: View {
                         onAccept: { onAccept(request) },
                         onDecline: { onDecline(request) }
                     )
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
                 }
             }
         }
@@ -638,6 +729,7 @@ struct EmptyRequestsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
+        .transition(.opacity.combined(with: .scale))
     }
 }
 
@@ -647,6 +739,7 @@ struct FriendRequestRowView: View {
     let onAccept: () -> Void
     let onDecline: () -> Void
     @State private var displayName: String = ""
+    @State private var isProcessing: Bool = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -670,12 +763,29 @@ struct FriendRequestRowView: View {
             Spacer()
 
             FriendRequestActionsView(
-                onAccept: onAccept,
-                onDecline: onDecline
+                onAccept: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isProcessing = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        onAccept()
+                    }
+                },
+                onDecline: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isProcessing = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        onDecline()
+                    }
+                },
+                isProcessing: isProcessing
             )
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
+        .opacity(isProcessing ? 0.6 : 1.0)
+        .scaleEffect(isProcessing ? 0.95 : 1.0)
         .onAppear {
             getDisplayName(from: request)
         }
@@ -694,6 +804,7 @@ struct FriendRequestRowView: View {
 struct FriendRequestActionsView: View {
     let onAccept: () -> Void
     let onDecline: () -> Void
+    let isProcessing: Bool
 
     var body: some View {
         HStack(spacing: 8) {
@@ -704,7 +815,9 @@ struct FriendRequestActionsView: View {
                     .foregroundColor(.white)
                     .frame(width: 28, height: 28)
                     .background(Circle().fill(.green))
+                    .scaleEffect(isProcessing ? 0.8 : 1.0)
             }
+            .disabled(isProcessing)
 
             Button(action: onDecline) {
                 Image(systemName: "xmark")
@@ -713,8 +826,11 @@ struct FriendRequestActionsView: View {
                     .foregroundColor(.white)
                     .frame(width: 28, height: 28)
                     .background(Circle().fill(.red))
+                    .scaleEffect(isProcessing ? 0.8 : 1.0)
             }
+            .disabled(isProcessing)
         }
+        .animation(.easeInOut(duration: 0.2), value: isProcessing)
     }
 }
 
